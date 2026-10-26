@@ -38,6 +38,7 @@ const state = {
   vibratoDepth: 25, // Air Thinker vibrato, in cents
   vibratoRate: 5.5, // vibrations per second
   snap: false, // Air Thinker: snap to the 12 notes
+  showTheremin: true, // Air Thinker: draw the theremin in the camera view
   playing: false,
   playCol: -1,
   playDuration: 0, // seconds of the piece being played
@@ -932,6 +933,7 @@ const applyVibrato = () => air.setVibrato(state.vibratoDepth, state.vibratoRate)
 controls.vibratoDepth = bindRange('vibratoDepth', (v) => (v ? `${v}` : 'off'), applyVibrato);
 controls.vibratoRate = bindRange('vibratoRate', (v) => `${v} /s`, applyVibrato);
 controls.snap = bindCheckbox('snap', () => (air.snap = state.snap));
+controls.showTheremin = bindCheckbox('showTheremin');
 
 // The settings bar is hidden until asked for; this browser remembers the choice.
 const settingsButton = document.querySelector('[data-action="settings"]');
@@ -1079,11 +1081,13 @@ function renderAir() {
   }
   const toStage = (p) => ({ x: box.x + p.x * box.w, y: box.y + p.y * box.h });
 
-  // The pitch range spans the visible part of the image, with a small margin.
+  // The pitch range spans the visible part of the image, with a small margin
+  // at the top and room for the theremin's cabinet at the bottom.
   const visibleTop = -box.y / box.h;
   const visibleBottom = (H - box.y) / box.h;
   const margin = 0.08 * (visibleBottom - visibleTop);
-  setAirBand(visibleTop + margin, visibleBottom - margin);
+  const bottomMargin = state.showTheremin ? Math.max(margin, 74 / box.h) : margin;
+  setAirBand(visibleTop + margin, visibleBottom - bottomMargin);
   const yOfMidi = (midi) => box.y + yOfHeight((midi - AIR_LOW) / (AIR_HIGH - AIR_LOW)) * box.h;
 
   // Pitch scale: a line per semitone, labelled at each C.
@@ -1108,6 +1112,7 @@ function renderAir() {
   const now = performance.now() / 1000;
   const head = W - 90;
   const xOfTime = (t) => head - ((now - t) / air.traceSeconds) * (head - 60);
+  if (air.running && state.showTheremin && airGuide.hidden) drawTheremin(head, yOfMidi, toStage, now);
   ctx.strokeStyle = '#2fb9d3';
   ctx.lineWidth = 6;
   ctx.lineCap = 'round';
@@ -1161,6 +1166,82 @@ function renderAir() {
   // The theremin guide stays up until a hand is in view.
   const status = airMessage ?? (!air.running ? 'Press Play to start the camera.' : 'Show your hand to the camera.');
   setAirGuide(airMessage !== null || !air.running || !air.hands.length, status, airMessage !== null);
+}
+
+// A theremin drawn into the camera view. Its antenna is the pitch scale, from
+// C3 at its base to C6 at its tip, and the melody trace flows out of it; waves
+// ripple toward the playing hand and the volume loop glows with the volume.
+function drawTheremin(antennaX, yOfMidi, toStage, now) {
+  const sounding = air.pitchHand && air.open;
+  const top = yOfMidi(AIR_LOW) + 10; // the cabinet sits just below C3
+  const tip = yOfMidi(AIR_HIGH);
+  const cabinetW = Math.min(240, W * 0.28);
+  const cabinetH = 36;
+  const left = antennaX + 16 - cabinetW;
+  const middle = top + cabinetH / 2;
+
+  ctx.save();
+  ctx.globalAlpha = 0.75;
+  ctx.lineCap = 'round';
+
+  ctx.strokeStyle = '#e9e5dc';
+  ctx.lineWidth = 3;
+  for (const [from, to] of [[0.3, 0.2], [0.5, 0.5], [0.7, 0.8]]) {
+    ctx.beginPath();
+    ctx.moveTo(left + cabinetW * from, top + cabinetH);
+    ctx.lineTo(left + cabinetW * to, top + cabinetH + 80);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#4a3426';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(left, top, cabinetW, cabinetH, 9);
+  else ctx.rect(left, top, cabinetW, cabinetH);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#e9e5dc';
+  for (const dx of [26, 46]) {
+    ctx.beginPath();
+    ctx.arc(left + dx, middle, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.strokeStyle = '#f2a35e';
+  ctx.lineWidth = 6;
+  ctx.globalAlpha = 0.45 + 0.5 * (air.volumeHand ? air.volume : 0.3);
+  ctx.beginPath();
+  ctx.moveTo(left, middle);
+  ctx.lineTo(left - 18, middle);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(left - 44, middle, 26, 10, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = ctx.fillStyle = '#2fb9d3';
+  ctx.globalAlpha = sounding ? 0.95 : 0.6;
+  ctx.beginPath();
+  ctx.moveTo(antennaX, top);
+  ctx.lineTo(antennaX, tip);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(antennaX, tip, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (sounding) {
+    const y = yOfMidi(air.pitch);
+    const palm = toStage(air.pitchHand[9]);
+    const toward = Math.atan2(palm.y - y, palm.x - antennaX);
+    const phase = (now * state.vibratoRate) % 1;
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 3; i++) {
+      const step = (i + phase) / 3;
+      ctx.globalAlpha = 0.6 * (1 - step);
+      ctx.beginPath();
+      ctx.arc(antennaX, y, 18 + step * 48, toward - 0.6, toward + 0.6);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
 }
 
 const airGuide = document.getElementById('air-guide');

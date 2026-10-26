@@ -35,7 +35,11 @@ Pantonal is an independent project, not affiliated with the House of Music Hunga
   Hungarian…), pentatonic, the modes, Turkish makams such as Hicaz, or Indian
   ragas such as Yaman, Bhairav and Malkauns. Each scale can be heard and comes
   with a short "Did you know?", and the **Echo** game plays a phrase for the
-  player to echo with their hand. Hand tracking runs entirely in the browser; the
+  player to echo with their hand. A synthesized **drone** follows the key and
+  scale to improvise over: a tanpura for ragas, a ney-like held tonic (dem)
+  for makams, and a root-and-fifth drone for everything else; ragas with Pa use a
+  real tanpura recording. A **rhythm** loop, a bendir played by Ozan, can play
+  along at an adjustable speed. Hand tracking runs entirely in the browser; the
   camera image never leaves the device.
 
 The drawing modes autosave in the browser, support undo and redo, and let each
@@ -79,6 +83,8 @@ host.
 | `src/musicxml.js`, `src/importxml.js` | MusicXML export and import |
 | `src/air.js` | Air Thinker: camera, hand tracking, the theremin voice and the scales |
 | `src/echo.js` | Air Thinker's Echo game |
+| `src/drone.js` | Air Thinker's drones: tanpura, dem and shruti |
+| `src/rhythm.js` | Air Thinker's bendir rhythm loop |
 | `src/scores.js` | Built-in melodies |
 | `src/icons.js` | The interface icons |
 | `src/i18n.js`, `src/i18n/` | Languages: translation files, note names, the language picker |
@@ -97,6 +103,8 @@ the Pantonal source only; bundled third-party files keep their own licenses:
 - `vendor/fonts/`: [Fredoka](https://fonts.google.com/specimen/Fredoka) SemiBold (Latin subset),
   SIL Open Font License 1.1 (see `vendor/fonts/Fredoka-OFL.txt`).
 - `samples/piano/`: Salamander Grand Piano by Alexander Holm, CC BY 3.0.
+- `samples/usul/`: bendir loop played by Ozan, CC BY 4.0.
+- `samples/tanpura/`: loop from "Tanpura 10" by sankalp on [Freesound](https://freesound.org/people/sankalp/sounds/153262/), CC0.
 - Every other folder in `samples/` (choir, flute and the 20 library
   instruments): FluidR3_GM soundfont by Frank Wen, via
   [midi-js-soundfonts](https://github.com/gleitz/midi-js-soundfonts), CC BY 3.0.

@@ -47,6 +47,8 @@
         <button data-action="export" class="chromatic-only"><span class="icon" data-icon="export"></span><span data-i18n="action.export">Export</span></button>
         <button data-action="settings" class="no-free" aria-pressed="false"><span class="icon" data-icon="settings"></span><span data-i18n="action.settings">Settings</span></button>
         <button data-action="scale" class="air-only" aria-expanded="false" aria-controls="scale-menu"><span class="icon" data-icon="scale"></span><span class="label">Free</span></button>
+        <button data-action="drone" class="air-only" aria-pressed="false"><span class="icon" data-icon="drone"></span><span data-i18n="action.drone">Drone</span></button>
+        <button data-action="rhythm" class="air-only" aria-pressed="false"><span class="icon" data-icon="drum"></span><span data-i18n="action.rhythm">Rhythm</span></button>
         <button data-action="echo" class="air-only" aria-pressed="false"><span class="icon" data-icon="echo"></span><span data-i18n="action.echo">Echo</span></button>
         <button id="play"><span class="icon" data-icon="play"></span><span class="label" data-i18n="action.play">Play</span></button>
       </header>
@@ -60,6 +62,7 @@
           <h4 data-i18n="scale.key">Key</h4>
           <div id="key-options" class="keys"></div>
           <p id="scale-hint"></p>
+          <p id="drone-hint"></p>
           <div class="scale-extra">
             <button id="scale-hear"><span class="icon" data-icon="play"></span><span data-i18n="scale.hear">Hear it</span></button>
             <p id="scale-fact"></p>
@@ -150,6 +153,9 @@
       <footer id="air-controls">
         <label><span data-i18n="settings.vibratoDepth">Vibrato depth</span> <input type="range" id="vibratoDepth" min="0" max="80" step="1"><output></output></label>
         <label><span data-i18n="settings.vibratoRate">Vibrato speed</span> <input type="range" id="vibratoRate" min="2" max="9" step="0.5"><output></output></label>
+        <label><span data-i18n="settings.droneVolume">Drone volume</span> <input type="range" id="droneVolume" min="0" max="100" step="5"><output></output></label>
+        <label><span data-i18n="settings.rhythmVolume">Rhythm volume</span> <input type="range" id="rhythmVolume" min="0" max="100" step="5"><output></output></label>
+        <label><span data-i18n="settings.rhythmSpeed">Rhythm speed</span> <input type="range" id="rhythmSpeed" min="85" max="115" step="5"><output></output></label>
         <label class="check"><input type="checkbox" id="showTheremin"> <span data-i18n="settings.theremin">Theremin</span></label>
       </footer>
     </main>
@@ -202,6 +208,8 @@
     <ul>
       <li data-i18n-html="about.piano.html"></li>
       <li data-i18n-html="about.instruments.html"></li>
+      <li data-i18n-html="about.tanpura.html"></li>
+      <li data-i18n-html="about.rhythm.html"></li>
       <li data-i18n-html="about.engine.html"></li>
       <li data-i18n-html="about.tracking.html"></li>
       <li data-i18n-html="about.font.html"></li>

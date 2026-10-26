@@ -11,6 +11,8 @@ import { ICONS, applyIcons } from './icons.js';
 import { createAir, setBand as setAirBand, SCALES, AIR_LOW, AIR_HIGH, yOfHeight } from './air.js';
 import { LANGUAGES, t, language, setLanguage, onLanguageChange, translatePage, keyName, noteName } from './i18n.js';
 import { createEcho } from './echo.js';
+import { createDrone, droneKind, tanpuraFirstString } from './drone.js';
+import { createRhythm } from './rhythm.js';
 
 applyIcons();
 translatePage();
@@ -45,6 +47,9 @@ const state = {
   airScale: 'free', // Air Thinker: a SCALES id
   airKey: 0, // Air Thinker: the key, 0 = C
   showTheremin: true, // Air Thinker: draw the theremin in the camera view
+  droneVolume: 60, // Air Thinker drone, in percent
+  rhythmVolume: 60, // Air Thinker percussion loop, in percent
+  rhythmSpeed: 100, // its speed, in percent
   playing: false,
   playCol: -1,
   playDuration: 0, // seconds of the piece being played
@@ -57,6 +62,8 @@ const view = { x: 0, y: 0 };
 let audio = null; // created on the first Play
 const air = createAir(); // Air Thinker's camera theremin
 const echo = createEcho(air); // Air Thinker's Echo game
+const drone = createDrone(); // Air Thinker's drone to improvise over
+const rhythm = createRhythm(); // Air Thinker's percussion loop
 let airError = null; // translation key of why the camera couldn't start, shown on the stage
 let notes = []; // Chromatic Thinker: quantized notes
 let byCol = []; // notes, or Free Thinker voices, by starting column
@@ -951,6 +958,16 @@ const applyVibrato = () => air.setVibrato(state.vibratoDepth, state.vibratoRate)
 controls.vibratoDepth = bindRange('vibratoDepth', (v) => (v ? `${v}` : t('settings.off')), applyVibrato);
 controls.vibratoRate = bindRange('vibratoRate', (v) => t('settings.perSecond', { n: v }), applyVibrato);
 controls.showTheremin = bindCheckbox('showTheremin');
+const applyDroneVolume = () => drone.setVolume((state.droneVolume / 100) ** 1.5);
+controls.droneVolume = bindRange('droneVolume', (v) => `${v}%`, applyDroneVolume);
+applyDroneVolume();
+const applyRhythm = () => {
+  rhythm.setVolume((state.rhythmVolume / 100) ** 1.5);
+  rhythm.setSpeed(state.rhythmSpeed / 100);
+};
+controls.rhythmVolume = bindRange('rhythmVolume', (v) => `${v}%`, applyRhythm);
+controls.rhythmSpeed = bindRange('rhythmSpeed', (v) => `${v}%`, applyRhythm);
+applyRhythm();
 
 // The settings bar is hidden until asked for; this browser remembers the choice.
 const settingsButton = document.querySelector('[data-action="settings"]');
@@ -1294,6 +1311,7 @@ function applyScale() {
   air.scale = scale.notes;
   air.key = state.airKey;
   if (echo.active) echo.setScale(scale.notes, state.airKey);
+  if (drone.playing) drone.start(droneSpec());
   const keyed = scale.notes && scale.notes.length < 12;
   const name = t(`scale.${state.airScale}`);
   scaleButton.querySelector('.label').textContent = keyed ? `${keyName(state.airKey)} · ${name}` : name;
@@ -1301,7 +1319,6 @@ function applyScale() {
 
 function renderScaleMenu() {
   const scale = SCALES[state.airScale];
-  const keyless = !scale.notes || scale.notes.length === 12;
   const pill = (label, selected, onClick, disabled = false) => {
     const button = document.createElement('button');
     button.textContent = label;
@@ -1326,7 +1343,7 @@ function renderScaleMenu() {
     return [heading, pills];
   }));
   document.getElementById('key-options').replaceChildren(...Array.from({ length: 12 }, (_, key) => pill(
-    keyName(key), !keyless && key === state.airKey, () => (state.airKey = key), keyless,
+    keyName(key), key === state.airKey, () => (state.airKey = key),
   )));
   const fact = document.createElement('strong');
   fact.textContent = `${t('scale.didYouKnow')} `;
@@ -1335,6 +1352,8 @@ function renderScaleMenu() {
   const hint = { free: 'scale.hint.free', chromatic: 'scale.hint.chromatic' }[state.airScale]
     ?? { ragas: 'scale.hint.raga', makams: 'scale.hint.makam' }[scale.group] ?? 'scale.hint.scale';
   document.getElementById('scale-hint').textContent = t(hint, { key: keyName(state.airKey), scale: t(`scale.${state.airScale}`) });
+  const kind = droneKind(scale.group);
+  document.getElementById('drone-hint').textContent = t(`drone.${kind}`, kind === 'tanpura' ? { first: tanpuraFirstString(scale.notes) } : {});
 }
 
 function toggleScaleMenu(open = scaleMenu.hidden) {
@@ -1359,6 +1378,45 @@ document.getElementById('scale-hear').addEventListener('click', () => {
   const root = 60 + state.airKey;
   const up = [...scale.notes.map((n) => root + n), root + 12];
   air.playPhrase([...up, ...up.slice(0, -1).reverse()], 0.28);
+});
+
+/* Drone */
+
+const droneButton = document.querySelector('[data-action="drone"]');
+const droneSpec = () => ({ ...SCALES[state.airScale], key: state.airKey });
+
+function stopDrone() {
+  drone.stop();
+  droneButton.setAttribute('aria-pressed', 'false');
+}
+
+droneButton.addEventListener('click', () => {
+  if (drone.playing) {
+    stopDrone();
+    return;
+  }
+  Tone.start(); // must be called inside the click
+  drone.start(droneSpec());
+  droneButton.setAttribute('aria-pressed', 'true');
+});
+
+/* Rhythm */
+
+const rhythmButton = document.querySelector('[data-action="rhythm"]');
+
+function stopRhythm() {
+  rhythm.stop();
+  rhythmButton.setAttribute('aria-pressed', 'false');
+}
+
+rhythmButton.addEventListener('click', () => {
+  if (rhythm.playing) {
+    stopRhythm();
+    return;
+  }
+  Tone.start(); // must be called inside the click
+  rhythm.start();
+  rhythmButton.setAttribute('aria-pressed', 'true');
 });
 
 /* Echo game */
@@ -1442,6 +1500,8 @@ function setMode(mode) {
   document.body.dataset.mode = mode;
   airGuide.hidden = true; // renderAir shows it in Air Thinker
   toggleScaleMenu(false);
+  if (drone.playing) stopDrone();
+  if (rhythm.playing) stopRhythm();
   state.strokes = [];
   state.tool = 'brush';
   setInstruments([...DEFAULT_INSTRUMENTS], defaultColors());

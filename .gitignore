@@ -1,4 +1,11 @@
 # Deploy package, rebuilt from the sources
 dist/
 
+# Source recordings downloaded or received while building the loops; only the
+# finished loops in samples/ belong in the repo.
+/153262__sankalp__tanpura-10.wav
+/168637__barisbozkurt__yuruk_sengin_semai.wav
+/improv.mp3
+/improv2.mp3
+
 .DS_Store

@@ -411,7 +411,8 @@ body:not([data-mode="air"]) .air-only {
 
 #scale-menu button.selected { background: #f2d22e; color: #1c1c1f; font-weight: 600; }
 #scale-menu button:disabled { opacity: 0.3; cursor: default; }
-#scale-hint { margin: -6px 0 16px; color: #999; font-size: 13px; }
+#scale-hint { margin: -6px 0 6px; color: #999; font-size: 13px; }
+#drone-hint { margin: 0 0 16px; color: #999; font-size: 13px; }
 
 @media (hover: hover) {
   #scale-menu button:not(:disabled):not(.selected):hover { background: #3a3a3f; }

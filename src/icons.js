@@ -22,6 +22,7 @@ export const ICONS = {
   chorus: icon('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M9 21h6"/>'),
   flute: icon('<path d="M3.5 18.5L17 5l2 2L5.5 20.5z"/><circle cx="9.5" cy="14.5" r="0.6" fill="currentColor"/><circle cx="12.5" cy="11.5" r="0.6" fill="currentColor"/><circle cx="15.5" cy="8.5" r="0.6" fill="currentColor"/>'),
   free: icon('<path d="M3 15c3-8 5-8 7-3s4 5 6 0 3-5 5-3"/>'),
+  drone: icon('<circle cx="12" cy="17" r="5"/><path d="M12 12V2"/><path d="M10 4h4"/><path d="M10 7h4"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/>'),
   echo: icon('<path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
   scale: icon('<path d="M3 19h4v-4h4v-4h4V7h4V3"/><circle cx="5" cy="19" r="0.5" fill="currentColor"/>'),
   hand: icon('<path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>'),

@@ -66,7 +66,9 @@ function links() {
   const a = (href, text) => `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
   return {
     ccby: a('https://creativecommons.org/licenses/by/3.0/', 'CC BY 3.0'),
+    ccby4: a('https://creativecommons.org/licenses/by/4.0/', 'CC BY 4.0'),
     soundfonts: a('https://github.com/gleitz/midi-js-soundfonts', 'midi-js-soundfonts'),
+    freesound: a('https://freesound.org/people/sankalp/sounds/153262/', 'Freesound'),
     tone: a('https://tonejs.github.io/', 'Tone.js'),
     mediapipe: a('https://ai.google.dev/edge/mediapipe', 'MediaPipe'),
     fredoka: a('https://fonts.google.com/specimen/Fredoka', 'Fredoka'),

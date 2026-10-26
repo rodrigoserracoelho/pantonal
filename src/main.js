@@ -8,7 +8,8 @@ import { SCORES, parseScore } from './scores.js';
 import { toMusicXML } from './musicxml.js';
 import { readScoreFile, chooseStep } from './importxml.js';
 import { ICONS, applyIcons } from './icons.js';
-import { createAir, setBand as setAirBand, SCALES, KEY_NAMES, AIR_LOW, AIR_HIGH, yOfHeight } from './air.js';
+import { createAir, setBand as setAirBand, SCALES, SCALE_FACTS, KEY_NAMES, AIR_LOW, AIR_HIGH, yOfHeight } from './air.js';
+import { createEcho } from './echo.js';
 
 applyIcons();
 
@@ -51,6 +52,7 @@ const view = { x: 0, y: 0 };
 
 let audio = null; // created on the first Play
 const air = createAir(); // Air Thinker's camera theremin
+const echo = createEcho(air); // Air Thinker's Echo game
 let airMessage = null; // why the camera couldn't start, shown on the stage
 let notes = []; // Chromatic Thinker: quantized notes
 let byCol = []; // notes, or Free Thinker voices, by starting column
@@ -1009,6 +1011,7 @@ function playFreeStep(col, time, stepDur) {
 }
 
 function stop() {
+  if (echo.active) echo.stop();
   if (air.running) air.stop();
   stopPlayback(audio);
   state.playing = false;
@@ -1138,7 +1141,23 @@ function renderAir() {
   }
   ctx.stroke();
 
-  const sounding = air.running && air.pitchHand && air.open;
+  // Echo game: a filled ring on the note being played to the player, a
+  // hollow one on the note to find when a hint is due.
+  if (echo.active) {
+    echo.update(now);
+    const ring = (midi, filled) => {
+      ctx.strokeStyle = ctx.fillStyle = '#f2d22e';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(head, yOfMidi(midi), 15, 0, Math.PI * 2);
+      if (filled) ctx.fill();
+      else ctx.stroke();
+    };
+    if (echo.phase === 'listen' && echo.listening >= 0) ring(echo.target[echo.listening], true);
+    if (echo.phase === 'play' && echo.showTarget) ring(echo.target[echo.matched], false);
+  }
+
+  const sounding = air.running && air.sounding;
   if (sounding) {
     const y = yOfMidi(air.pitch);
     ctx.fillStyle = '#2fb9d3';
@@ -1259,6 +1278,7 @@ function applyScale() {
   const scale = SCALES[state.airScale];
   air.scale = scale.notes;
   air.key = state.airKey;
+  if (echo.active) echo.setScale(scale.notes, state.airKey);
   const keyed = scale.notes && scale.notes.length < 12;
   scaleButton.querySelector('.label').textContent = keyed ? `${KEY_NAMES[state.airKey]} · ${scale.label}` : scale.label;
 }
@@ -1292,6 +1312,10 @@ function renderScaleMenu() {
   document.getElementById('key-options').replaceChildren(...KEY_NAMES.map((name, key) => pill(
     name, !keyless && key === state.airKey, () => (state.airKey = key), keyless,
   )));
+  const fact = document.createElement('strong');
+  fact.textContent = 'Did you know? ';
+  document.getElementById('scale-fact').replaceChildren(fact, SCALE_FACTS[state.airScale]);
+
   const key = KEY_NAMES[state.airKey];
   document.getElementById('scale-hint').textContent = state.airScale === 'free'
     ? 'Glides through every pitch, like a real theremin.'
@@ -1315,6 +1339,58 @@ function toggleScaleMenu(open = scaleMenu.hidden) {
 }
 
 scaleButton.addEventListener('click', () => toggleScaleMenu());
+
+// Plays the scale up and down from its key note, or a slow glide for Free.
+document.getElementById('scale-hear').addEventListener('click', () => {
+  Tone.start(); // must be called inside the click
+  const scale = SCALES[state.airScale];
+  if (!scale.notes) {
+    air.playPhrase([60, 72, 60], 1.2, { glide: true });
+    return;
+  }
+  const root = 60 + state.airKey;
+  const up = [...scale.notes.map((n) => root + n), root + 12];
+  air.playPhrase([...up, ...up.slice(0, -1).reverse()], 0.28);
+});
+
+/* Echo game */
+
+const echoButton = document.querySelector('[data-action="echo"]');
+
+echoButton.addEventListener('click', async () => {
+  if (echo.active) {
+    echo.stop();
+    return;
+  }
+  toggleScaleMenu(false);
+  if (!air.running) await startAir();
+  if (air.running) echo.start(SCALES[state.airScale].notes, state.airKey);
+});
+
+for (const button of document.querySelectorAll('[data-echo]')) {
+  button.addEventListener('click', () => (button.dataset.echo === 'replay' ? echo.replay() : echo.next()));
+}
+
+echo.onChange = () => {
+  const panel = document.getElementById('echo-panel');
+  panel.hidden = !echo.active;
+  echoButton.setAttribute('aria-pressed', String(echo.active));
+  if (!echo.active) return;
+  document.getElementById('echo-dots').replaceChildren(...echo.target.map((_, i) => {
+    const dot = document.createElement('span');
+    if (i < echo.matched) dot.className = 'done';
+    else if (i === echo.matched && echo.phase === 'play') dot.className = 'next';
+    return dot;
+  }));
+  const status = {
+    listen: 'Listen…',
+    play: echo.hint === 'higher' ? 'Higher ↑' : echo.hint === 'lower' ? 'Lower ↓'
+      : `Your turn! Echo the ${echo.target.length} notes.`,
+    success: `Great echo! Next one has ${echo.length} notes.`,
+  }[echo.phase] ?? '';
+  document.getElementById('echo-status').textContent = status;
+  for (const button of panel.querySelectorAll('button')) button.disabled = echo.phase === 'listen';
+};
 document.addEventListener('pointerdown', (e) => {
   if (!scaleMenu.hidden && !scaleMenu.contains(e.target) && !scaleButton.contains(e.target)) toggleScaleMenu(false);
 });

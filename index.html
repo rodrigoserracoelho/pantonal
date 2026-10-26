@@ -47,6 +47,7 @@
         <button data-action="export" class="chromatic-only"><span class="icon" data-icon="export"></span>Export</button>
         <button data-action="settings" class="no-free" aria-pressed="false"><span class="icon" data-icon="settings"></span>Settings</button>
         <button data-action="scale" class="air-only" aria-expanded="false" aria-controls="scale-menu"><span class="icon" data-icon="scale"></span><span class="label">Free</span></button>
+        <button data-action="echo" class="air-only" aria-pressed="false"><span class="icon" data-icon="echo"></span>Echo</button>
         <button id="play"><span class="icon" data-icon="play"></span><span class="label">Play</span></button>
       </header>
 
@@ -59,7 +60,21 @@
           <h4>Key</h4>
           <div id="key-options" class="keys"></div>
           <p id="scale-hint"></p>
+          <div class="scale-extra">
+            <button id="scale-hear"><span class="icon" data-icon="play"></span>Hear it</button>
+            <p id="scale-fact"></p>
+          </div>
           <div id="scale-options"></div>
+        </div>
+
+        <!-- Air Thinker: the Echo game. -->
+        <div id="echo-panel" hidden>
+          <div id="echo-dots"></div>
+          <p id="echo-status"></p>
+          <div class="echo-buttons">
+            <button data-echo="replay">Hear again</button>
+            <button data-echo="next">New phrase</button>
+          </div>
         </div>
 
         <!-- Air Thinker: how to play, shown until a hand is in view. -->

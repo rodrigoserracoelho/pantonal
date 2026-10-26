@@ -51,6 +51,39 @@ export const SCALES = {
   malkauns: { group: 'Indian ragas', label: 'Malkauns', notes: [0, 3, 5, 8, 10] },
   hamsadhwani: { group: 'Indian ragas', label: 'Hamsadhwani', notes: [0, 2, 4, 7, 11] },
 };
+// A short fact per scale for the scale menu.
+export const SCALE_FACTS = {
+  free: 'A real theremin has no keys or frets: players find every note by ear.',
+  chromatic: 'All 12 notes, each a semitone apart: every white and black key of a piano.',
+  major: 'The bright "happy" scale of countless songs, from "Twinkle, Twinkle" to "Ode to Joy".',
+  major_pentatonic: 'Five notes that never clash, found in folk music all over the world. The black keys of a piano form one.',
+  minor_pentatonic: 'The backbone of blues and rock guitar solos.',
+  japanese_in: 'A traditional Japanese scale, heard in music for the koto.',
+  natural_minor: 'The darker sister of major: the same notes as a major scale, starting from its 6th note.',
+  harmonic_minor: 'Raising the 7th note gives minor a strong pull back home. Bach and Mozart used it all the time.',
+  melodic_minor: 'Classical musicians raise the 6th and 7th notes going up; jazz players keep them raised both ways.',
+  hungarian_minor: 'Also called "Gypsy minor". Franz Liszt used its sound in his Hungarian Rhapsodies.',
+  neapolitan_minor: 'Named after the opera composers of 18th-century Naples.',
+  dorian: 'Minor with a bright 6th note: the old English song "Scarborough Fair" uses it.',
+  phrygian: 'Its dark, low 2nd note gives the sound of Spanish flamenco.',
+  lydian: 'Major with a raised 4th: dreamy and floating. The Simpsons theme uses it.',
+  mixolydian: 'Major with a lowered 7th, heard in lots of rock and folk, like the Beatles\' "Norwegian Wood".',
+  locrian: 'The rarest mode: its home chord is so unstable that it is hard to end a tune on it.',
+  hicaz: 'One of the best-known makams, also heard in Greek and Arabic music (as Hitzaz and Hijaz).',
+  hicazkar: 'A more dramatic relative of Hicaz, from Ottoman classical music.',
+  kurdi: 'Its name means "Kurdish". It has a dark, minor sound.',
+  nikriz: 'It has Hicaz\'s wide step, higher up. Klezmer musicians know the same notes as "Mi sheberakh".',
+  suzinak: 'Two moods in one: it starts bright like makam Rast and ends like Hicaz.',
+  yaman: 'An evening raga, often one of the first ragas students learn in North India.',
+  bhairav: 'A sunrise raga, named after Bhairava, a fierce form of the god Shiva.',
+  bhairavi: 'A morning raga that often closes a concert. It uses all four "flat" notes.',
+  todi: 'A morning raga with a serious, haunting mood.',
+  purvi: 'A sunset raga. Its name means "eastern".',
+  marwa: 'A sunset raga with a restless mood. It skips Pa, the fifth note.',
+  malkauns: 'A deep, meditative five-note raga for late at night.',
+  hamsadhwani: 'A South Indian (Carnatic) raga. Its name means "the cry of the swan".',
+};
+
 export const KEY_NAMES = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
 
 // The note of the scale nearest to `midi`. No scale has a gap wider than four
@@ -123,6 +156,7 @@ export function createAir() {
     trace: [], // { t, midi }; midi is null while silent
     scale: null, // pitch classes (above `key`) the pitch snaps to; null glides freely
     key: 0,
+    sounding: false, // the hand is playing (and no phrase is)
   };
 
   let voice = null;
@@ -130,7 +164,50 @@ export function createAir() {
   let stream = null;
   let lastFrameTime = -1;
   let smoothed = null;
+  let phraseUntil = 0; // while a phrase plays, the hand stays silent
 
+  // The oscillator starts on first use and then keeps running, silent when
+  // nothing plays, so phrases and the hand can share it freely.
+  function ensureVoice() {
+    voice ??= createVoice();
+    if (voice.osc.state !== 'started') {
+      voice.osc.start();
+      voice.vibrato.start();
+    }
+  }
+
+  // Plays `midis` one after another, `noteSeconds` each, in the theremin voice:
+  // as separate notes with a short slide between them, or as one continuous
+  // glide. Returns how long it lasts, in seconds.
+  air.playPhrase = (midis, noteSeconds, { glide = false } = {}) => {
+    ensureVoice();
+    const freq = voice.osc.frequency;
+    const gain = voice.gain.gain;
+    const t0 = Tone.now() + 0.05;
+    const end = t0 + midis.length * noteSeconds;
+    freq.cancelScheduledValues(t0);
+    gain.cancelScheduledValues(t0);
+    freq.setValueAtTime(mtof(midis[0]), t0);
+    gain.setValueAtTime(0, t0);
+    gain.linearRampToValueAtTime(0.5, t0 + 0.05);
+    midis.forEach((midi, i) => {
+      if (!i) return;
+      const t = t0 + i * noteSeconds;
+      if (glide) {
+        freq.exponentialRampToValueAtTime(mtof(midi), t);
+      } else {
+        freq.setValueAtTime(mtof(midis[i - 1]), t - 0.04);
+        freq.exponentialRampToValueAtTime(mtof(midi), t);
+        gain.setValueAtTime(0.5, t - 0.08);
+        gain.linearRampToValueAtTime(0.18, t - 0.02);
+        gain.linearRampToValueAtTime(0.5, t + 0.04);
+      }
+    });
+    gain.setValueAtTime(0.5, end - 0.1);
+    gain.linearRampToValueAtTime(0, end + 0.1);
+    phraseUntil = performance.now() / 1000 + (end - t0) + 0.25;
+    return end - t0;
+  };
   air.setVibrato = (depthCents, rate) => {
     if (!voice) return;
     voice.vibrato.min = -depthCents;
@@ -160,10 +237,8 @@ export function createAir() {
       throw new Error('Hand tracking could not be loaded on this device.');
     }
 
-    voice ??= createVoice();
+    ensureVoice();
     air.setVibrato(vibrato.depth, vibrato.rate);
-    voice.osc.start();
-    voice.vibrato.start();
     air.running = true;
     smoothed = null;
     requestAnimationFrame(loop);
@@ -173,11 +248,8 @@ export function createAir() {
     air.running = false;
     stream?.getTracks().forEach((track) => track.stop());
     stream = null;
-    if (voice) {
-      voice.gain.gain.rampTo(0, 0.1);
-      voice.osc.stop('+0.15');
-      voice.vibrato.stop('+0.15');
-    }
+    voice?.gain.gain.rampTo(0, 0.1);
+    air.sounding = false;
     air.hands = [];
     air.pitchHand = air.volumeHand = null;
     air.pitch = null;
@@ -217,9 +289,12 @@ export function createAir() {
     }
     air.volume = air.volumeHand ? 0.15 + 0.85 * heightOf(air.volumeHand[PALM].y) : 1;
 
-    const sounding = Boolean(air.pitchHand && air.open);
-    if (sounding) voice.osc.frequency.rampTo(mtof(air.pitch), 0.04);
-    voice.gain.gain.rampTo(sounding ? 0.6 * air.volume : 0, sounding ? 0.06 : 0.12);
+    const sounding = Boolean(air.pitchHand && air.open) && now >= phraseUntil;
+    if (now >= phraseUntil) {
+      if (sounding) voice.osc.frequency.rampTo(mtof(air.pitch), 0.04);
+      voice.gain.gain.rampTo(sounding ? 0.6 * air.volume : 0, sounding ? 0.06 : 0.12);
+    }
+    air.sounding = sounding;
 
     air.trace.push({ t: now, midi: sounding ? air.pitch : null });
     while (air.trace.length && air.trace[0].t < now - TRACE_SECONDS) air.trace.shift();

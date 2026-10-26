@@ -417,6 +417,84 @@ body:not([data-mode="air"]) .air-only {
   #scale-menu button:not(:disabled):not(.selected):hover { background: #3a3a3f; }
 }
 
+/* ---- Air Thinker: "Hear it", facts and the Echo game ---- */
+
+.scale-extra {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+#scale-menu #scale-hear {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #f2d22e;
+  background: transparent;
+  color: #f2d22e;
+  font-weight: 600;
+}
+
+#scale-hear .icon svg { width: 16px; height: 16px; }
+#scale-fact { margin: 0; color: #bbb; font-size: 13px; line-height: 1.4; }
+#scale-fact strong { color: #fff; }
+
+#echo-panel {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  z-index: 3;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 280px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(42, 42, 46, 0.94);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+#echo-panel[hidden] { display: none; }
+#echo-dots { display: flex; gap: 10px; }
+
+#echo-dots span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4a4a50;
+}
+
+#echo-dots span.done { background: #6cbf6a; }
+#echo-dots span.next { background: transparent; box-shadow: inset 0 0 0 3px #f2d22e; }
+
+#echo-status {
+  margin: 0;
+  color: #fff;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.echo-buttons { display: flex; gap: 8px; }
+
+.echo-buttons button {
+  padding: 8px 14px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  background: transparent;
+  color: #ddd;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.echo-buttons button:disabled { opacity: 0.35; cursor: default; }
+
 /* ---- Air Thinker guide ---- */
 
 #air-guide {

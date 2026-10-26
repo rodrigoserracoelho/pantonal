@@ -33,7 +33,9 @@ Pantonal is an independent project, not affiliated with the House of Music Hunga
   with adjustable vibrato. Pitch glides freely like the real instrument, or
   snaps to a scale in any key: major, the minors (natural, harmonic, melodic,
   Hungarian…), pentatonic, the modes, Turkish makams such as Hicaz, or Indian
-  ragas such as Yaman, Bhairav and Malkauns. Hand tracking runs entirely in the browser; the
+  ragas such as Yaman, Bhairav and Malkauns. Each scale can be heard and comes
+  with a short "Did you know?", and the **Echo** game plays a phrase for the
+  player to echo with their hand. Hand tracking runs entirely in the browser; the
   camera image never leaves the device.
 
 The drawing modes autosave in the browser, support undo and redo, and let each
@@ -62,7 +64,8 @@ host.
 | `src/main.js` | Canvas, tools, toolbar, dialogs, playback wiring, session saving |
 | `src/music.js` | Instrument library, pitch mapping, turning lines into notes, audio engine |
 | `src/musicxml.js`, `src/importxml.js` | MusicXML export and import |
-| `src/air.js` | Air Thinker: camera, hand tracking and the theremin voice |
+| `src/air.js` | Air Thinker: camera, hand tracking, the theremin voice and the scales |
+| `src/echo.js` | Air Thinker's Echo game |
 | `src/scores.js` | Built-in melodies |
 | `src/icons.js` | The interface icons |
 | `samples/` | Instrument recordings |

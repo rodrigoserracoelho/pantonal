@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-This license covers the Pantonal source code only. Third-party files keep
-their own licenses: vendor/ (Tone.js, MIT, see vendor/Tone.LICENSE.md; the
-Fredoka font, SIL Open Font License, see vendor/fonts/Fredoka-OFL.txt) and
-samples/ (Creative Commons, see samples/CREDITS.md).

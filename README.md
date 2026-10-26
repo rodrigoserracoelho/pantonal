@@ -8,7 +8,8 @@ Pantonal turns drawings into music. Draw lines on a canvas and hear them
 played: left to right is time, bottom to top is pitch. It's made for touch
 screens and for kids, and runs in any modern browser.
 
-Try it at **[pantonal.app](https://pantonal.app)**.
+Try it at **[pantonal.app](https://pantonal.app)**. Contributions and ideas are
+welcome: open an [issue](https://github.com/rodrigoserracoelho/pantonal/issues) or a pull request.
 
 ## About
 
@@ -61,7 +62,8 @@ host.
 
 ## License and credits
 
-Pantonal's code is MIT licensed (see [LICENSE](LICENSE)). Bundled third-party files:
+Pantonal's code is MIT licensed (see [LICENSE](LICENSE)). That license covers
+the Pantonal source only; bundled third-party files keep their own licenses:
 
 - `vendor/Tone.js`: [Tone.js](https://tonejs.github.io/) 14.8.49 by Yotam Mann, MIT.
 - `vendor/fonts/`: [Fredoka](https://fonts.google.com/specimen/Fredoka) SemiBold (Latin subset),

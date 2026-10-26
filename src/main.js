@@ -8,6 +8,7 @@ import { SCORES, parseScore } from './scores.js';
 import { toMusicXML } from './musicxml.js';
 import { readScoreFile, chooseStep } from './importxml.js';
 import { ICONS, applyIcons } from './icons.js';
+import { createAir, setBand as setAirBand, AIR_LOW, AIR_HIGH, yOfHeight } from './air.js';
 
 applyIcons();
 
@@ -34,6 +35,9 @@ const state = {
   duration: 12, // seconds per screen
   grid: true,
   loop: false,
+  vibratoDepth: 25, // Air Thinker vibrato, in cents
+  vibratoRate: 5.5, // vibrations per second
+  snap: false, // Air Thinker: snap to the 12 notes
   playing: false,
   playCol: -1,
   playDuration: 0, // seconds of the piece being played
@@ -44,6 +48,8 @@ const state = {
 const view = { x: 0, y: 0 };
 
 let audio = null; // created on the first Play
+const air = createAir(); // Air Thinker's camera theremin
+let airMessage = null; // why the camera couldn't start, shown on the stage
 let notes = []; // Chromatic Thinker: quantized notes
 let byCol = []; // notes, or Free Thinker voices, by starting column
 let totalCols = 0; // length of the piece in columns
@@ -118,6 +124,11 @@ function playheadX() {
 }
 
 function render() {
+  if (state.mode === 'air') {
+    renderAir();
+    requestAnimationFrame(render);
+    return;
+  }
   refreshNotes();
   const chromatic = isChromatic();
   const range = PITCH_RANGE;
@@ -514,6 +525,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 canvas.addEventListener('pointerdown', (e) => {
+  if (state.mode === 'air') return;
   canvas.setPointerCapture(e.pointerId);
   closeScoreMenu();
   if (state.tool === 'pan') {
@@ -692,7 +704,7 @@ function syncToolbar() {
   for (const b of document.querySelectorAll('[data-tool]')) b.classList.toggle('active', b.dataset.tool === state.tool);
   for (const b of document.querySelectorAll('[data-inst]')) b.classList.toggle('active', b.dataset.inst === state.inst);
   if (state.tool !== 'select') selection.clear();
-  canvas.style.cursor = state.tool === 'pan' ? 'grab' : 'crosshair';
+  canvas.style.cursor = state.mode === 'air' ? 'default' : state.tool === 'pan' ? 'grab' : 'crosshair';
   syncSelectBar();
 }
 
@@ -916,12 +928,16 @@ const controls = {
 controls.grid = bindCheckbox('grid');
 controls.loop = bindCheckbox('loop');
 
+const applyVibrato = () => air.setVibrato(state.vibratoDepth, state.vibratoRate);
+controls.vibratoDepth = bindRange('vibratoDepth', (v) => (v ? `${v}` : 'off'), applyVibrato);
+controls.vibratoRate = bindRange('vibratoRate', (v) => `${v} /s`, applyVibrato);
+controls.snap = bindCheckbox('snap', () => (air.snap = state.snap));
+
 // The settings bar is hidden until asked for; this browser remembers the choice.
 const settingsButton = document.querySelector('[data-action="settings"]');
-const settingsBar = document.getElementById('controls');
 
 function showSettings(show) {
-  settingsBar.hidden = !show;
+  document.body.classList.toggle('settings-open', show);
   settingsButton.setAttribute('aria-pressed', String(show));
   try {
     localStorage.setItem('pantonal.settings', show ? 'shown' : 'hidden');
@@ -930,7 +946,7 @@ function showSettings(show) {
   }
 }
 
-settingsButton.addEventListener('click', () => showSettings(settingsBar.hidden));
+settingsButton.addEventListener('click', () => showSettings(!document.body.classList.contains('settings-open')));
 try {
   showSettings(localStorage.getItem('pantonal.settings') === 'shown');
 } catch {
@@ -991,6 +1007,7 @@ function playFreeStep(col, time, stepDur) {
 }
 
 function stop() {
+  if (air.running) air.stop();
   stopPlayback(audio);
   state.playing = false;
   state.playCol = -1;
@@ -999,6 +1016,7 @@ function stop() {
 
 playButton.addEventListener('click', async () => {
   if (state.playing) return stop();
+  if (state.mode === 'air') return startAir();
   const audioStarted = Tone.start(); // must be called inside the click
   audio ??= createAudio();
   // Instant once the session's sounds are loaded; the first time shows Loading.
@@ -1016,6 +1034,144 @@ playButton.addEventListener('click', async () => {
   playButton.disabled = false;
   play();
 });
+
+/* ---- Air Thinker ---- */
+
+async function startAir() {
+  Tone.start(); // must be called inside the click
+  playButton.disabled = true;
+  playButton.querySelector('.label').textContent = 'Loading…';
+  airMessage = null;
+  try {
+    await Tone.start();
+    await air.start({ depth: state.vibratoDepth, rate: state.vibratoRate });
+    air.snap = state.snap;
+    state.playing = true;
+    setPlayButton(true);
+  } catch (err) {
+    airMessage = err.message;
+    setPlayButton(false);
+  } finally {
+    playButton.disabled = false;
+  }
+}
+
+// The mirrored camera image with the pitch scale, the hands, and a trace of
+// the last few seconds of melody scrolling to the left.
+function renderAir() {
+  ctx.fillStyle = '#141416';
+  ctx.fillRect(0, 0, W, H);
+
+  // The camera image covers the stage; hand positions map onto it the same way.
+  const video = air.video;
+  let box = { x: 0, y: 0, w: W, h: H };
+  if (air.running && video?.videoWidth) {
+    const scale = Math.max(W / video.videoWidth, H / video.videoHeight);
+    box = { w: video.videoWidth * scale, h: video.videoHeight * scale };
+    box.x = (W - box.w) / 2;
+    box.y = (H - box.h) / 2;
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.translate(W, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, box.x, box.y, box.w, box.h);
+    ctx.restore();
+  }
+  const toStage = (p) => ({ x: box.x + p.x * box.w, y: box.y + p.y * box.h });
+
+  // The pitch range spans the visible part of the image, with a small margin.
+  const visibleTop = -box.y / box.h;
+  const visibleBottom = (H - box.y) / box.h;
+  const margin = 0.08 * (visibleBottom - visibleTop);
+  setAirBand(visibleTop + margin, visibleBottom - margin);
+  const yOfMidi = (midi) => box.y + yOfHeight((midi - AIR_LOW) / (AIR_HIGH - AIR_LOW)) * box.h;
+
+  // Pitch scale: a line per semitone, labelled at each C.
+  ctx.font = '600 13px Fredoka, system-ui, sans-serif';
+  ctx.textBaseline = 'middle';
+  for (let midi = AIR_LOW; midi <= AIR_HIGH; midi++) {
+    const y = yOfMidi(midi);
+    const isC = midi % 12 === 0;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${isC ? 0.28 : state.snap ? 0.12 : 0.05})`;
+    ctx.lineWidth = isC ? 1.5 : 1;
+    ctx.beginPath();
+    ctx.moveTo(isC ? 44 : 0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+    if (isC) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillText(midiName(midi), 10, y);
+    }
+  }
+
+  // The melody so far: its head is the note sounding now.
+  const now = performance.now() / 1000;
+  const head = W - 90;
+  const xOfTime = (t) => head - ((now - t) / air.traceSeconds) * (head - 60);
+  ctx.strokeStyle = '#2fb9d3';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  let penDown = false;
+  for (const { t, midi } of air.trace) {
+    if (midi === null) {
+      penDown = false;
+      continue;
+    }
+    const x = xOfTime(t);
+    const y = yOfMidi(midi);
+    if (penDown) ctx.lineTo(x, y);
+    else ctx.moveTo(x, y);
+    penDown = true;
+  }
+  ctx.stroke();
+
+  const sounding = air.running && air.pitchHand && air.open;
+  if (sounding) {
+    const y = yOfMidi(air.pitch);
+    ctx.fillStyle = '#2fb9d3';
+    ctx.beginPath();
+    ctx.arc(head, y, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = '600 26px Fredoka, system-ui, sans-serif';
+    ctx.fillText(midiName(Math.round(air.pitch)), head + 20, y);
+  }
+
+  // The hands: the pitch hand glows while it plays, the volume hand in peach.
+  for (const hand of air.hands) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    for (const point of hand) {
+      const p = toStage(point);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    const palm = toStage(hand[9]);
+    const isPitch = hand === air.pitchHand;
+    ctx.fillStyle = isPitch ? (air.open ? '#2fb9d3' : '#777') : '#f2a35e';
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath();
+    ctx.arc(palm.x, palm.y, isPitch ? 18 : 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // The theremin guide stays up until a hand is in view.
+  const status = airMessage ?? (!air.running ? 'Press Play to start the camera.' : 'Show your hand to the camera.');
+  setAirGuide(airMessage !== null || !air.running || !air.hands.length, status, airMessage !== null);
+}
+
+const airGuide = document.getElementById('air-guide');
+const airGuideStatus = document.getElementById('air-guide-status');
+
+function setAirGuide(show, status, isError) {
+  if (airGuide.hidden === !show && airGuideStatus.textContent === status) return;
+  airGuide.hidden = !show;
+  airGuideStatus.textContent = status;
+  airGuideStatus.style.color = isError ? '#f2a35e' : '';
+}
 
 /* ---- Mode ---- */
 
@@ -1041,6 +1197,7 @@ function setMode(mode) {
   stop();
   state.mode = mode;
   document.body.dataset.mode = mode;
+  airGuide.hidden = true; // renderAir shows it in Air Thinker
   state.strokes = [];
   state.tool = 'brush';
   setInstruments([...DEFAULT_INSTRUMENTS], defaultColors());
@@ -1114,7 +1271,7 @@ function sessionBody() {
 }
 
 function saveSession() {
-  if (!state.mode || drawing.size || selectGesture || panGesture) return;
+  if (!state.mode || state.mode === 'air' || drawing.size || selectGesture || panGesture) return;
   // A fresh, still empty session never replaces the saved drawing.
   if (!state.strokes.length && lastSaved === null) return;
   // Building the body is costly for big drawings: only do it after a change.

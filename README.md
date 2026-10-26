@@ -20,7 +20,7 @@ on twelve-note music, hence the name.
 
 Pantonal is an independent project, not affiliated with the House of Music Hungary.
 
-## Two ways to play
+## Three ways to play
 
 - **Free Thinker**: one canvas, no grid. Lines glide through every pitch, and
   vertical lines ring as clusters.
@@ -28,9 +28,13 @@ Pantonal is an independent project, not affiliated with the House of Music Hunga
   with instrument layers, select / copy / paste for ostinatos, a canvas that
   scrolls in time and pitch, famous melodies to start from, MusicXML import, and
   export to MuseScore with no key or time signature.
+- **Air Thinker**: a theremin played with your hands in front of the camera.
+  One hand sets the pitch (close it to stop the sound), the other the volume,
+  with adjustable vibrato. Hand tracking runs entirely in the browser; the
+  camera image never leaves the device.
 
-Both modes autosave in the browser, support undo and redo, and let each drawing
-use up to six instruments from a library of 23.
+The drawing modes autosave in the browser, support undo and redo, and let each
+drawing use up to six instruments from a library of 23.
 
 ## Running
 
@@ -55,6 +59,7 @@ host.
 | `src/main.js` | Canvas, tools, toolbar, dialogs, playback wiring, session saving |
 | `src/music.js` | Instrument library, pitch mapping, turning lines into notes, audio engine |
 | `src/musicxml.js`, `src/importxml.js` | MusicXML export and import |
+| `src/air.js` | Air Thinker: camera, hand tracking and the theremin voice |
 | `src/scores.js` | Built-in melodies |
 | `src/icons.js` | The interface icons |
 | `samples/` | Instrument recordings |
@@ -66,6 +71,9 @@ Pantonal's code is MIT licensed (see [LICENSE](LICENSE)). That license covers
 the Pantonal source only; bundled third-party files keep their own licenses:
 
 - `vendor/Tone.js`: [Tone.js](https://tonejs.github.io/) 14.8.49 by Yotam Mann, MIT.
+- `vendor/mediapipe/`: [MediaPipe](https://ai.google.dev/edge/mediapipe) Tasks Vision 0.10.35
+  and the Hand Landmarker model by Google, Apache License 2.0 (see
+  `vendor/mediapipe/LICENSE-Apache-2.0.txt`).
 - `vendor/fonts/`: [Fredoka](https://fonts.google.com/specimen/Fredoka) SemiBold (Latin subset),
   SIL Open Font License 1.1 (see `vendor/fonts/Fredoka-OFL.txt`).
 - `samples/piano/`: Salamander Grand Piano by Alexander Holm, CC BY 3.0.

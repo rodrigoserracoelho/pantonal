@@ -25,33 +25,89 @@
       <button class="brand" data-action="about" aria-label="About Pantonal">
         <img src="assets/logo/pantonal-mark.svg" alt="" width="40" height="40">
       </button>
-      <button data-tool="brush" class="active"><span class="icon" data-icon="brush"></span>Brush</button>
-      <button data-tool="erase"><span class="icon" data-icon="erase"></span>Erase</button>
+      <button data-tool="brush" class="active drawing-only"><span class="icon" data-icon="brush"></span>Brush</button>
+      <button data-tool="erase" class="drawing-only"><span class="icon" data-icon="erase"></span>Erase</button>
       <button data-tool="select" class="chromatic-only"><span class="icon" data-icon="select"></span>Select</button>
       <button data-tool="pan" class="chromatic-only"><span class="icon" data-icon="pan"></span>Pan</button>
-      <hr>
-      <div id="instruments"></div>
+      <hr class="drawing-only">
+      <div id="instruments" class="drawing-only"></div>
     </nav>
 
     <main>
       <!-- Top bar: what you do with the drawing. -->
       <header id="topbar">
         <button data-action="mode"><span class="icon" data-icon="mode"></span>Mode</button>
-        <span class="divider"></span>
-        <button data-action="undo"><span class="icon" data-icon="undo"></span>Undo</button>
-        <button data-action="redo"><span class="icon" data-icon="redo"></span>Redo</button>
-        <button data-action="clear"><span class="icon" data-icon="clear"></span>Clear</button>
-        <span class="divider"></span>
-        <button data-action="instruments"><span class="icon" data-icon="instruments"></span>Instruments</button>
+        <span class="divider drawing-only"></span>
+        <button data-action="undo" class="drawing-only"><span class="icon" data-icon="undo"></span>Undo</button>
+        <button data-action="redo" class="drawing-only"><span class="icon" data-icon="redo"></span>Redo</button>
+        <button data-action="clear" class="drawing-only"><span class="icon" data-icon="clear"></span>Clear</button>
+        <span class="divider drawing-only"></span>
+        <button data-action="instruments" class="drawing-only"><span class="icon" data-icon="instruments"></span>Instruments</button>
         <button data-action="score" class="chromatic-only"><span class="icon" data-icon="score"></span>Score</button>
         <button data-action="export" class="chromatic-only"><span class="icon" data-icon="export"></span>Export</button>
-        <button data-action="settings" class="chromatic-only" aria-pressed="false"><span class="icon" data-icon="settings"></span>Settings</button>
+        <button data-action="settings" class="no-free" aria-pressed="false"><span class="icon" data-icon="settings"></span>Settings</button>
         <button id="play"><span class="icon" data-icon="play"></span><span class="label">Play</span></button>
       </header>
 
       <div id="stage">
         <canvas id="canvas"></canvas>
         <div id="score-menu" hidden></div>
+
+        <!-- Air Thinker: how to play, shown until a hand is in view. -->
+        <div id="air-guide" hidden>
+          <svg class="theremin" viewBox="-34 0 404 280" role="img" aria-label="A theremin: a wooden box on a stand, with a vertical antenna on the right for pitch and a loop on the left for volume, and a hand near each">
+            <!-- field around the pitch antenna -->
+            <g fill="none" stroke="#2fb9d3" stroke-width="2.5" stroke-linecap="round">
+              <path d="M262 74a16 16 0 0 1 0 30" opacity="0.6"/>
+              <path d="M270 66a26 26 0 0 1 0 46" opacity="0.35"/>
+            </g>
+            <!-- stand -->
+            <g stroke="#e9e5dc" stroke-width="3" stroke-linecap="round">
+              <path d="M150 206L132 266"/>
+              <path d="M220 206L238 266"/>
+              <path d="M185 206V266"/>
+            </g>
+            <!-- cabinet with two knobs -->
+            <rect x="100" y="150" width="170" height="56" rx="10" fill="#4a3426" stroke="#e9e5dc" stroke-width="3"/>
+            <circle cx="132" cy="178" r="6" fill="#e9e5dc"/>
+            <circle cx="156" cy="178" r="6" fill="#e9e5dc"/>
+            <!-- pitch antenna (right) and volume loop (left) -->
+            <path d="M250 150V42" stroke="#2fb9d3" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="250" cy="38" r="6" fill="#2fb9d3"/>
+            <path d="M100 170H80" stroke="#f2a35e" stroke-width="6" stroke-linecap="round"/>
+            <ellipse cx="56" cy="170" rx="24" ry="11" fill="none" stroke="#f2a35e" stroke-width="6"/>
+            <!-- hands -->
+            <g fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+              <g transform="translate(282 62) scale(2.2)">
+                <path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>
+              </g>
+              <g transform="translate(84 96) scale(-2 2)">
+                <path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>
+              </g>
+            </g>
+            <!-- what each hand does -->
+            <g stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+              <path d="M342 70V48M336 54l6-6 6 6M342 116v22M336 132l6 6 6-6" stroke="#2fb9d3"/>
+              <path d="M-8 108V88M-14 94l6-6 6 6M-8 136v20M-14 150l6 6 6-6" stroke="#f2a35e"/>
+            </g>
+            <g font-family="Fredoka, system-ui, sans-serif" font-weight="600" font-size="14" text-anchor="middle">
+              <text x="342" y="38" fill="#2fb9d3">higher</text>
+              <text x="342" y="156" fill="#2fb9d3">lower</text>
+              <text x="-8" y="78" fill="#f2a35e">louder</text>
+              <text x="-8" y="174" fill="#f2a35e">softer</text>
+            </g>
+          </svg>
+          <div class="air-guide-text">
+            <h2>Play it like a theremin</h2>
+            <p class="fact">The theremin, invented by Leon Theremin around 1920, is played without touching it.</p>
+            <ul>
+              <li><span class="dot pitch"></span><span><strong>Right hand</strong>: up is higher, down is lower.</span></li>
+              <li><span class="dot closed"></span><span><strong>Close your hand</strong> to stop the sound.</span></li>
+              <li><span class="dot volume"></span><span><strong>Left hand</strong> (optional): up is louder.</span></li>
+            </ul>
+            <p id="air-guide-status"></p>
+          </div>
+        </div>
         <div id="select-bar" hidden>
           <button data-select="copy">Copy</button>
           <button data-select="paste">Paste</button>
@@ -59,12 +115,18 @@
         </div>
       </div>
 
-      <footer id="controls" class="chromatic-only" hidden>
+      <footer id="controls">
         <label>Time / screen <input type="range" id="duration" min="2" max="60" step="1"><output></output></label>
         <label>Octaves / screen <input type="range" id="octaves" min="1" max="9" step="1"><output></output></label>
         <label>Steps / screen <input type="range" id="cols" min="16" max="256" step="4"><output></output></label>
         <label class="check"><input type="checkbox" id="grid"> Grid</label>
         <label class="check"><input type="checkbox" id="loop"> Loop</label>
+      </footer>
+
+      <footer id="air-controls">
+        <label>Vibrato depth <input type="range" id="vibratoDepth" min="0" max="80" step="1"><output></output></label>
+        <label>Vibrato speed <input type="range" id="vibratoRate" min="2" max="9" step="0.5"><output></output></label>
+        <label class="check"><input type="checkbox" id="snap"> Snap to notes</label>
       </footer>
     </main>
   </div>
@@ -90,6 +152,11 @@
         <strong>Chromatic Thinker</strong>
         <span>The 12 notes on a grid. Instrument layers, scores, copy &amp; paste, export to MuseScore.</span>
       </button>
+      <button data-mode="air">
+        <span class="icon" data-icon="hand"></span>
+        <strong>Air Thinker</strong>
+        <span>Play with your hands in the air, like a theremin. Uses the camera; the video never leaves this device.</span>
+      </button>
     </div>
     <p id="mode-warning" hidden>Switching mode clears the current drawing.</p>
     <button id="mode-cancel" hidden>Cancel</button>
@@ -105,7 +172,8 @@
       Pantonal turns drawings into music. Draw lines on a canvas and hear them played:
       left to right is time, bottom to top is pitch. <strong>Free Thinker</strong> lets lines
       glide through every pitch; <strong>Chromatic Thinker</strong> places them on the twelve
-      notes of the chromatic scale, with instrument layers, scores and export to MuseScore.
+      notes of the chromatic scale, with instrument layers, scores and export to MuseScore;
+      <strong>Air Thinker</strong> turns the camera into a theremin you play with your hands.
     </p>
 
     <h3>Inspiration</h3>
@@ -121,6 +189,7 @@
       <li>Piano: Salamander Grand Piano by Alexander Holm, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>.</li>
       <li>All other instruments: FluidR3_GM soundfont by Frank Wen, via <a href="https://github.com/gleitz/midi-js-soundfonts" target="_blank" rel="noopener">midi-js-soundfonts</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>.</li>
       <li>Audio engine: <a href="https://tonejs.github.io/" target="_blank" rel="noopener">Tone.js</a> by Yotam Mann, MIT License.</li>
+      <li>Hand tracking (Air Thinker): <a href="https://ai.google.dev/edge/mediapipe" target="_blank" rel="noopener">MediaPipe</a> by Google, Apache License 2.0. It runs on this device only; the camera image is never sent or stored.</li>
       <li>Typeface: <a href="https://fonts.google.com/specimen/Fredoka" target="_blank" rel="noopener">Fredoka</a>, SIL Open Font License.</li>
     </ul>
     <p class="about-license">

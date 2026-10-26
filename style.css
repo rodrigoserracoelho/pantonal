@@ -263,14 +263,18 @@ main {
 
 /* ---- Modes ---- */
 
+/* Free: no grid tools. Air: no drawing at all. */
 body[data-mode="free"] .chromatic-only,
-body[data-mode="free"] .clear-layer {
+body[data-mode="free"] .no-free,
+body[data-mode="free"] .clear-layer,
+body[data-mode="air"] .chromatic-only,
+body[data-mode="air"] .drawing-only {
   display: none !important;
 }
 
 #mode-dialog {
   width: calc(100% - 32px);
-  max-width: 720px;
+  max-width: 880px;
   padding: 32px;
   border: none;
   border-radius: 16px;
@@ -320,7 +324,7 @@ body[data-mode="free"] .clear-layer {
 
 .modes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
 }
 
@@ -359,6 +363,69 @@ body[data-mode="free"] .clear-layer {
   font: inherit;
   text-decoration: underline;
   cursor: pointer;
+}
+
+/* ---- Air Thinker guide ---- */
+
+#air-guide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 40px;
+  padding: 24px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#air-guide[hidden] { display: none; }
+
+#air-guide .theremin {
+  width: min(360px, 42%);
+  min-width: 220px;
+  height: auto;
+}
+
+.air-guide-text {
+  max-width: 360px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: rgba(20, 20, 22, 0.78);
+  color: #ccc;
+  line-height: 1.45;
+}
+
+.air-guide-text h2 {
+  margin: 0 0 6px;
+  color: #fff;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.air-guide-text .fact { margin: 0 0 14px; color: #999; font-size: 13px; }
+.air-guide-text ul { margin: 0; padding: 0; list-style: none; }
+.air-guide-text li { display: flex; align-items: baseline; gap: 10px; margin: 6px 0; }
+.air-guide-text strong { color: #fff; }
+
+.air-guide-text .dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transform: translateY(1px);
+}
+
+.air-guide-text .dot.pitch { background: #2fb9d3; }
+.air-guide-text .dot.closed { background: #777; }
+.air-guide-text .dot.volume { background: #f2a35e; }
+
+#air-guide-status {
+  margin: 14px 0 0;
+  color: #f2d22e;
+  font-weight: 600;
 }
 
 /* ---- About ---- */
@@ -553,8 +620,10 @@ button.instrument-card:disabled { opacity: 0.35; cursor: default; }
 
 /* ---- Controls ---- */
 
-#controls {
-  display: flex;
+/* Settings bars: hidden until the Settings button opens the one for the mode. */
+#controls,
+#air-controls {
+  display: none;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 24px;
@@ -563,17 +632,22 @@ button.instrument-card:disabled { opacity: 0.35; cursor: default; }
   font-size: 13px;
 }
 
-#controls label {
+#controls label,
+#air-controls label {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-#controls output {
+#controls output,
+#air-controls output {
   min-width: 3.5em;
   font-variant-numeric: tabular-nums;
   color: #aaa;
 }
 
-#controls input[type="checkbox"] { width: 18px; height: 18px; }
-#controls[hidden] { display: none; }
+#controls input[type="checkbox"],
+#air-controls input[type="checkbox"] { width: 18px; height: 18px; }
+
+body.settings-open[data-mode="chromatic"] #controls,
+body.settings-open[data-mode="air"] #air-controls { display: flex; }

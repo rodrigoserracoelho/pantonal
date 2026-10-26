@@ -22,6 +22,7 @@ export const ICONS = {
   chorus: icon('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M9 21h6"/>'),
   flute: icon('<path d="M3.5 18.5L17 5l2 2L5.5 20.5z"/><circle cx="9.5" cy="14.5" r="0.6" fill="currentColor"/><circle cx="12.5" cy="11.5" r="0.6" fill="currentColor"/><circle cx="15.5" cy="8.5" r="0.6" fill="currentColor"/>'),
   free: icon('<path d="M3 15c3-8 5-8 7-3s4 5 6 0 3-5 5-3"/>'),
+  hand: icon('<path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>'),
   instruments: icon('<circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/>'),
   mallets: icon('<path d="M5 20l8.5-8.5"/><circle cx="15.5" cy="9.5" r="2.5"/><path d="M19 20l-8.5-8.5"/><circle cx="8.5" cy="9.5" r="2.5"/>'),
   bells: icon('<path d="M6 17v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/><path d="M12 3v3"/>'),

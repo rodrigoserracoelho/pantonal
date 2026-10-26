@@ -1,6 +1,6 @@
 /* global Tone */
 import {
-  LIBRARY, DEFAULT_INSTRUMENTS, MAX_INSTRUMENTS, COLORS, FREE_COLS, PITCH_RANGE, rowToMidi, midiToRow, midiName,
+  LIBRARY, DEFAULT_INSTRUMENTS, MAX_INSTRUMENTS, COLORS, FREE_COLS, PITCH_RANGE, rowToMidi, midiToRow,
   isBlackKey, noteToMidi, mtof, freeMidi, quantize, freeVoices, createAudio, startPlayback, stopPlayback,
   playbackSeconds,
 } from './music.js';
@@ -8,10 +8,14 @@ import { SCORES, parseScore } from './scores.js';
 import { toMusicXML } from './musicxml.js';
 import { readScoreFile, chooseStep } from './importxml.js';
 import { ICONS, applyIcons } from './icons.js';
-import { createAir, setBand as setAirBand, SCALES, SCALE_FACTS, KEY_NAMES, AIR_LOW, AIR_HIGH, yOfHeight } from './air.js';
+import { createAir, setBand as setAirBand, SCALES, AIR_LOW, AIR_HIGH, yOfHeight } from './air.js';
+import { LANGUAGES, t, language, setLanguage, onLanguageChange, translatePage, keyName, noteName } from './i18n.js';
 import { createEcho } from './echo.js';
 
 applyIcons();
+translatePage();
+
+const instrumentName = (id) => t(`instrument.${id}`);
 
 const BRUSH_WIDTH = 10;
 const ERASE_RADIUS = 20;
@@ -53,7 +57,7 @@ const view = { x: 0, y: 0 };
 let audio = null; // created on the first Play
 const air = createAir(); // Air Thinker's camera theremin
 const echo = createEcho(air); // Air Thinker's Echo game
-let airMessage = null; // why the camera couldn't start, shown on the stage
+let airError = null; // translation key of why the camera couldn't start, shown on the stage
 let notes = []; // Chromatic Thinker: quantized notes
 let byCol = []; // notes, or Free Thinker voices, by starting column
 let totalCols = 0; // length of the piece in columns
@@ -182,7 +186,7 @@ function render() {
       ctx.lineTo(left + W, (row + 1) * rh);
       ctx.stroke();
       ctx.fillStyle = '#a49e90';
-      ctx.fillText(midiName(midi), left + 4, (row + 1) * rh - 3);
+      ctx.fillText(noteName(midi), left + 4, (row + 1) * rh - 3);
     }
   }
 
@@ -600,8 +604,9 @@ function buildInstrumentRail() {
     const button = document.createElement('button');
     button.dataset.inst = id;
     button.style.setProperty('--accent', colorOf(id));
-    button.innerHTML = `<span class="clear-layer" title="Clear ${inst.label}">⊗</span>`
-      + `<span class="icon" style="color: ${colorOf(id)}">${ICONS[inst.icon]}</span>${inst.label}`;
+    button.innerHTML = `<span class="clear-layer">⊗</span><span class="icon" style="color: ${colorOf(id)}">${ICONS[inst.icon]}</span><span class="name"></span>`;
+    button.querySelector('.clear-layer').title = t('layer.clear', { name: instrumentName(id) });
+    button.querySelector('.name').textContent = instrumentName(id);
     button.addEventListener('click', (e) => {
       if (e.target.closest('.clear-layer')) {
         record();
@@ -652,17 +657,16 @@ function removeInstrument(id) {
 
 function renderInstrumentsDialog() {
   const full = state.instruments.length >= MAX_INSTRUMENTS;
-  document.getElementById('instruments-note').textContent = full
-    ? `This drawing has the maximum of ${MAX_INSTRUMENTS} instruments. Remove one to add another.`
-    : `Up to ${MAX_INSTRUMENTS} instruments per drawing. Removing one also removes its lines (Undo brings them back).`;
+  document.getElementById('instruments-note').textContent = t(full ? 'inst.full' : 'inst.note', { n: MAX_INSTRUMENTS });
 
   const current = document.getElementById('session-instruments');
   current.replaceChildren(...state.instruments.map((id) => {
     const card = document.createElement('div');
     card.className = 'instrument-card';
     card.innerHTML = `<span class="icon" style="color: ${colorOf(id)}">${ICONS[LIBRARY[id].icon]}</span>`
-      + `<span class="name"></span><button class="remove" aria-label="Remove ${LIBRARY[id].label}">✕</button>`;
-    card.querySelector('.name').textContent = LIBRARY[id].label;
+      + '<span class="name"></span><button class="remove">✕</button>';
+    card.querySelector('.name').textContent = instrumentName(id);
+    card.querySelector('.remove').setAttribute('aria-label', t('inst.remove', { name: instrumentName(id) }));
     const remove = card.querySelector('button');
     remove.disabled = state.instruments.length <= 1;
     remove.addEventListener('click', () => {
@@ -679,7 +683,7 @@ function renderInstrumentsDialog() {
   const library = document.getElementById('library-instruments');
   library.replaceChildren(...Object.entries(families).flatMap(([family, ids]) => {
     const heading = document.createElement('h4');
-    heading.textContent = family;
+    heading.textContent = t(`family.${family}`);
     const grid = document.createElement('div');
     grid.className = 'instrument-grid';
     for (const id of ids) {
@@ -687,7 +691,7 @@ function renderInstrumentsDialog() {
       button.className = 'instrument-card';
       button.disabled = full;
       button.innerHTML = `<span class="icon">${ICONS[LIBRARY[id].icon]}</span><span class="name"></span>`;
-      button.querySelector('.name').textContent = LIBRARY[id].label;
+      button.querySelector('.name').textContent = instrumentName(id);
       button.addEventListener('click', () => {
         addInstrument(id);
         renderInstrumentsDialog();
@@ -732,14 +736,27 @@ document.querySelector('[data-action="clear"]').addEventListener('click', () => 
 const scoreMenu = document.getElementById('score-menu');
 const closeScoreMenu = () => (scoreMenu.hidden = true);
 
-for (const score of SCORES) {
-  const button = document.createElement('button');
-  button.innerHTML = `${score.title}<small>${score.composer}</small>`;
-  button.addEventListener('click', () => {
-    loadScore(score);
+function buildScoreMenu() {
+  scoreMenu.replaceChildren(...SCORES.map((score) => {
+    const button = document.createElement('button');
+    button.innerHTML = '<span></span><small></small>';
+    button.querySelector('span').textContent = t(score.title);
+    button.querySelector('small').textContent = t(score.composer);
+    button.addEventListener('click', () => {
+      loadScore(score);
+      closeScoreMenu();
+    });
+    return button;
+  }));
+  const importButton = document.createElement('button');
+  importButton.innerHTML = '<span></span><small></small>';
+  importButton.querySelector('span').textContent = t('import.menu');
+  importButton.querySelector('small').textContent = t('import.formats');
+  importButton.addEventListener('click', () => {
     closeScoreMenu();
+    importFile.click();
   });
-  scoreMenu.append(button);
+  scoreMenu.append(importButton);
 }
 
 document.querySelector('[data-action="score"]').addEventListener('click', () => {
@@ -785,13 +802,7 @@ const importDialog = document.getElementById('import-dialog');
 const importFile = document.getElementById('import-file');
 const QUARTERS_PER_SCREEN = 16;
 
-const importButton = document.createElement('button');
-importButton.innerHTML = 'Import MusicXML…<small>.musicxml, .xml or .mxl</small>';
-importButton.addEventListener('click', () => {
-  closeScoreMenu();
-  importFile.click();
-});
-scoreMenu.append(importButton);
+buildScoreMenu();
 
 importFile.addEventListener('change', async () => {
   const file = importFile.files[0];
@@ -800,7 +811,7 @@ importFile.addEventListener('change', async () => {
   try {
     openImportDialog(await readScoreFile(file));
   } catch (err) {
-    openImportDialog(null, err.message);
+    openImportDialog(null, t(err.message));
   }
 });
 
@@ -809,7 +820,7 @@ importFile.addEventListener('change', async () => {
 function openImportDialog(score, error) {
   const list = document.getElementById('import-parts');
   list.replaceChildren();
-  document.getElementById('import-title').textContent = score ? score.title : 'Couldn’t import this file';
+  document.getElementById('import-title').textContent = score ? score.title || t('import.untitled') : t('import.failed');
   document.getElementById('import-error').textContent = error ?? '';
   document.getElementById('import-confirm').hidden = !score;
   importDialog.score = score;
@@ -819,9 +830,12 @@ function openImportDialog(score, error) {
     if (!part.notes.length) return;
     const row = document.createElement('label');
     row.className = 'import-part';
-    const options = state.instruments.map((id) => `<option value="${id}">${LIBRARY[id].label}</option>`).join('');
-    row.innerHTML = `<span></span><select data-part="${index}">${options}<option value="">Skip</option></select>`;
-    row.querySelector('span').textContent = `${part.name} · ${part.notes.length} notes`;
+    row.innerHTML = `<span></span><select data-part="${index}"></select>`;
+    const select = row.querySelector('select');
+    for (const [value, label] of [...state.instruments.map((id) => [id, instrumentName(id)]), ['', t('import.skip')]]) {
+      select.append(new Option(label, value));
+    }
+    row.querySelector('span').textContent = t('import.part', { name: part.name, n: part.notes.length });
     row.querySelector('select').value = defaults.shift() ?? '';
     list.append(row);
   });
@@ -863,7 +877,7 @@ document.querySelector('[data-action="export"]').addEventListener('click', () =>
   refreshNotes();
   if (!notes.length) return;
   const duration = (totalCols * state.duration) / state.cols;
-  const xml = toMusicXML({ notes, cols: totalCols, duration, instruments: state.instruments });
+  const xml = toMusicXML({ notes, cols: totalCols, duration, instruments: state.instruments, instrumentName });
   const url = URL.createObjectURL(new Blob([xml], { type: 'application/vnd.recordare.musicxml+xml' }));
   const link = document.createElement('a');
   link.href = url;
@@ -892,6 +906,7 @@ function bindRange(key, format, onChange) {
       sync();
       onChange();
     },
+    refresh: sync,
   };
 }
 
@@ -922,7 +937,7 @@ function zoom() {
 
 const restartIfPlaying = () => state.playing && play();
 const controls = {
-  duration: bindRange('duration', (v) => `${v} s`, restartIfPlaying),
+  duration: bindRange('duration', (v) => t('settings.seconds', { n: v }), restartIfPlaying),
   octaves: bindRange('octaves', (v) => `${v}`, zoom),
   cols: bindRange('cols', (v) => `${v}`, () => {
     notesDirty = true;
@@ -933,8 +948,8 @@ controls.grid = bindCheckbox('grid');
 controls.loop = bindCheckbox('loop');
 
 const applyVibrato = () => air.setVibrato(state.vibratoDepth, state.vibratoRate);
-controls.vibratoDepth = bindRange('vibratoDepth', (v) => (v ? `${v}` : 'off'), applyVibrato);
-controls.vibratoRate = bindRange('vibratoRate', (v) => `${v} /s`, applyVibrato);
+controls.vibratoDepth = bindRange('vibratoDepth', (v) => (v ? `${v}` : t('settings.off')), applyVibrato);
+controls.vibratoRate = bindRange('vibratoRate', (v) => t('settings.perSecond', { n: v }), applyVibrato);
 controls.showTheremin = bindCheckbox('showTheremin');
 
 // The settings bar is hidden until asked for; this browser remembers the choice.
@@ -963,7 +978,7 @@ const playButton = document.getElementById('play');
 
 function setPlayButton(playing) {
   playButton.querySelector('.icon').innerHTML = ICONS[playing ? 'stop' : 'play'];
-  playButton.querySelector('.label').textContent = playing ? 'Stop' : 'Play';
+  playButton.querySelector('.label').textContent = t(playing ? 'action.stop' : 'action.play');
   playButton.classList.toggle('active', playing);
 }
 
@@ -1026,7 +1041,7 @@ playButton.addEventListener('click', async () => {
   audio ??= createAudio();
   // Instant once the session's sounds are loaded; the first time shows Loading.
   playButton.disabled = true;
-  playButton.querySelector('.label').textContent = 'Loading…';
+  playButton.querySelector('.label').textContent = t('action.loading');
   try {
     await audioStarted;
     await audio.ready(state.instruments);
@@ -1045,15 +1060,15 @@ playButton.addEventListener('click', async () => {
 async function startAir() {
   Tone.start(); // must be called inside the click
   playButton.disabled = true;
-  playButton.querySelector('.label').textContent = 'Loading…';
-  airMessage = null;
+  playButton.querySelector('.label').textContent = t('action.loading');
+  airError = null;
   try {
     await Tone.start();
     await air.start({ depth: state.vibratoDepth, rate: state.vibratoRate });
     state.playing = true;
     setPlayButton(true);
   } catch (err) {
-    airMessage = err.message;
+    airError = err.message;
     setPlayButton(false);
   } finally {
     playButton.disabled = false;
@@ -1113,7 +1128,7 @@ function renderAir() {
     ctx.stroke();
     if (labelled) {
       ctx.fillStyle = isKey ? 'rgba(242, 210, 46, 0.9)' : 'rgba(255, 255, 255, 0.6)';
-      ctx.fillText(midiName(midi), 10, y);
+      ctx.fillText(noteName(midi), 10, y);
     }
   }
 
@@ -1166,7 +1181,7 @@ function renderAir() {
     ctx.fill();
     ctx.fillStyle = '#fff';
     ctx.font = '600 26px Fredoka, system-ui, sans-serif';
-    ctx.fillText(midiName(Math.round(air.pitch)), head + 20, y);
+    ctx.fillText(noteName(Math.round(air.pitch)), head + 20, y);
   }
 
   // The hands: the pitch hand glows while it plays, the volume hand in peach.
@@ -1189,8 +1204,8 @@ function renderAir() {
   }
 
   // The theremin guide stays up until a hand is in view.
-  const status = airMessage ?? (!air.running ? 'Press Play to start the camera.' : 'Show your hand to the camera.');
-  setAirGuide(airMessage !== null || !air.running || !air.hands.length, status, airMessage !== null);
+  const status = t(airError ?? (!air.running ? 'guide.press' : 'guide.show'));
+  setAirGuide(airError !== null || !air.running || !air.hands.length, status, airError !== null);
 }
 
 // A theremin drawn into the camera view. Its antenna is the pitch scale, from
@@ -1280,7 +1295,8 @@ function applyScale() {
   air.key = state.airKey;
   if (echo.active) echo.setScale(scale.notes, state.airKey);
   const keyed = scale.notes && scale.notes.length < 12;
-  scaleButton.querySelector('.label').textContent = keyed ? `${KEY_NAMES[state.airKey]} · ${scale.label}` : scale.label;
+  const name = t(`scale.${state.airScale}`);
+  scaleButton.querySelector('.label').textContent = keyed ? `${keyName(state.airKey)} · ${name}` : name;
 }
 
 function renderScaleMenu() {
@@ -1303,30 +1319,22 @@ function renderScaleMenu() {
   for (const [id, s] of Object.entries(SCALES)) (groups[s.group] ??= []).push([id, s]);
   document.getElementById('scale-options').replaceChildren(...Object.entries(groups).flatMap(([group, scales]) => {
     const heading = document.createElement('h4');
-    heading.textContent = group;
+    heading.textContent = t(`group.${group}`);
     const pills = document.createElement('div');
     pills.className = 'pills';
-    pills.append(...scales.map(([id, s]) => pill(s.label, id === state.airScale, () => (state.airScale = id))));
+    pills.append(...scales.map(([id]) => pill(t(`scale.${id}`), id === state.airScale, () => (state.airScale = id))));
     return [heading, pills];
   }));
-  document.getElementById('key-options').replaceChildren(...KEY_NAMES.map((name, key) => pill(
-    name, !keyless && key === state.airKey, () => (state.airKey = key), keyless,
+  document.getElementById('key-options').replaceChildren(...Array.from({ length: 12 }, (_, key) => pill(
+    keyName(key), !keyless && key === state.airKey, () => (state.airKey = key), keyless,
   )));
   const fact = document.createElement('strong');
-  fact.textContent = 'Did you know? ';
-  document.getElementById('scale-fact').replaceChildren(fact, SCALE_FACTS[state.airScale]);
+  fact.textContent = `${t('scale.didYouKnow')} `;
+  document.getElementById('scale-fact').replaceChildren(fact, t(`fact.${state.airScale}`));
 
-  const key = KEY_NAMES[state.airKey];
-  document.getElementById('scale-hint').textContent = state.airScale === 'free'
-    ? 'Glides through every pitch, like a real theremin.'
-    : state.airScale === 'chromatic' ? 'Snaps to the 12 notes.'
-      : scale.group === 'Indian ragas'
-        ? `The notes of raga ${scale.label}, with Sa on ${key}. Real ragas also have their own phrases, ornaments and in-between pitches.`
-        : scale.group === 'Turkish makams'
-          ? `The notes of makam ${scale.label} on ${key}. Real makams also use finer pitches (koma) and their own melodic paths.`
-          : scale.group === 'Minor'
-            ? `Every note snaps to ${key} ${scale.label.toLowerCase()} minor, so it always sounds in tune.`
-            : `Every note snaps to ${key} ${scale.label}, so it always sounds in tune.`;
+  const hint = { free: 'scale.hint.free', chromatic: 'scale.hint.chromatic' }[state.airScale]
+    ?? { ragas: 'scale.hint.raga', makams: 'scale.hint.makam' }[scale.group] ?? 'scale.hint.scale';
+  document.getElementById('scale-hint').textContent = t(hint, { key: keyName(state.airKey), scale: t(`scale.${state.airScale}`) });
 }
 
 function toggleScaleMenu(open = scaleMenu.hidden) {
@@ -1383,10 +1391,9 @@ echo.onChange = () => {
     return dot;
   }));
   const status = {
-    listen: 'Listen…',
-    play: echo.hint === 'higher' ? 'Higher ↑' : echo.hint === 'lower' ? 'Lower ↓'
-      : `Your turn! Echo the ${echo.target.length} notes.`,
-    success: `Great echo! Next one has ${echo.length} notes.`,
+    listen: t('echo.listen'),
+    play: echo.hint ? t(`echo.${echo.hint}`) : t('echo.yourTurn', { n: echo.target.length }),
+    success: t('echo.success', { n: echo.length }),
   }[echo.phase] ?? '';
   document.getElementById('echo-status').textContent = status;
   for (const button of panel.querySelectorAll('button')) button.disabled = echo.phase === 'listen';
@@ -1411,17 +1418,20 @@ function setAirGuide(show, status, isError) {
 const modeDialog = document.getElementById('mode-dialog');
 
 function openModeDialog() {
-  const continueButton = document.getElementById('mode-continue');
-  continueButton.hidden = Boolean(state.mode) || !savedSession?.strokes.length;
-  if (!continueButton.hidden) {
-    const name = savedSession.mode === 'free' ? 'Free Thinker' : 'Chromatic Thinker';
-    continueButton.querySelector('small').textContent = `${name} · ${timeAgo(savedSession.savedAt)}`;
-  }
-  document.getElementById('mode-warning').hidden = !state.mode || !state.strokes.length;
-  document.getElementById('mode-cancel').hidden = !state.mode;
+  openModeDialog.refresh();
   for (const b of modeDialog.querySelectorAll('[data-mode]')) b.classList.toggle('current', b.dataset.mode === state.mode);
   modeDialog.showModal();
 }
+
+openModeDialog.refresh = () => {
+  const continueButton = document.getElementById('mode-continue');
+  continueButton.hidden = Boolean(state.mode) || !savedSession?.strokes.length;
+  if (!continueButton.hidden) {
+    continueButton.querySelector('small').textContent = `${t(`mode.${savedSession.mode}`)} · ${timeAgo(savedSession.savedAt)}`;
+  }
+  document.getElementById('mode-warning').hidden = !state.mode || !state.strokes.length;
+  document.getElementById('mode-cancel').hidden = !state.mode;
+};
 
 // Switching mode starts from an empty canvas and history.
 function setMode(mode) {
@@ -1548,15 +1558,43 @@ function restoreSession(session) {
 
 function timeAgo(time) {
   const minutes = Math.round((Date.now() - time) / 60000);
-  if (!time || minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes} min ago`;
-  if (minutes < 60 * 24) return `${Math.round(minutes / 60)} h ago`;
-  return new Date(time).toLocaleDateString();
+  if (!time || minutes < 1) return t('time.now');
+  if (minutes < 60) return t('time.minutes', { n: minutes });
+  if (minutes < 60 * 24) return t('time.hours', { n: Math.round(minutes / 60) });
+  return new Date(time).toLocaleDateString(language());
 }
 
 document.getElementById('mode-continue').addEventListener('click', () => restoreSession(savedSession));
 setInterval(saveSession, 1000);
 window.addEventListener('pagehide', saveSession);
+
+/* ---- Language ---- */
+
+for (const picker of document.querySelectorAll('.language-picker')) {
+  picker.replaceChildren(...Object.entries(LANGUAGES).map(([code, { name }]) => {
+    const button = document.createElement('button');
+    button.dataset.language = code;
+    button.lang = code;
+    button.textContent = name;
+    button.addEventListener('click', () => setLanguage(code));
+    return button;
+  }));
+}
+translatePage(); // marks the current language in the pickers
+
+// Everything built by script is rebuilt in the new language; the page's own
+// text is updated by translatePage.
+onLanguageChange(() => {
+  buildInstrumentRail();
+  buildScoreMenu();
+  applyScale();
+  if (!scaleMenu.hidden) renderScaleMenu();
+  if (instrumentsDialog.open) renderInstrumentsDialog();
+  if (modeDialog.open) openModeDialog.refresh();
+  for (const control of Object.values(controls)) control.refresh?.();
+  setPlayButton(state.playing);
+  echo.onChange();
+});
 
 buildInstrumentRail();
 syncHistoryButtons();

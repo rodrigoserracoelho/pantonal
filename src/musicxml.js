@@ -134,15 +134,16 @@ function partXML(part, cols, measureCount, bpm, withTempo) {
   }).join('\n');
 }
 
-// `instruments` is the session's list of LIBRARY ids, in part order.
-export function toMusicXML({ notes, cols, duration, instruments, title = 'Pantonal' }) {
+// `instruments` is the session's list of LIBRARY ids, in part order, and
+// `instrumentName(id)` names their parts.
+export function toMusicXML({ notes, cols, duration, instruments, instrumentName, title = 'Pantonal' }) {
   const range = PITCH_RANGE;
   const bpm = Math.round(60 / ((duration / cols) * 4));
   const measureCount = Math.ceil(cols / STEPS_PER_MEASURE);
 
   const parts = instruments
     .map((id) => ({
-      inst: LIBRARY[id],
+      inst: { label: instrumentName(id), program: LIBRARY[id].program },
       notes: mergeOverlaps(notes
         .filter((n) => n.inst === id)
         .map((n) => ({ midi: rowToMidi(n.row, range), start: n.col, end: n.col + n.len }))),

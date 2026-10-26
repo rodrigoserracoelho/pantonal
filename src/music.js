@@ -1,35 +1,36 @@
 /* global Tone */
 
-// Every instrument a session can use. `samples` is its folder under samples/
+// Every instrument a session can use (names are in the translation files).
+// `samples` is its folder under samples/
 // (sources and licenses in samples/CREDITS.md), `icon` an entry in icons.js,
 // `program` the General MIDI program used when exporting, and `loop` (seconds
 // into the ~3 s recordings) sustains long notes of instruments that don't
 // die away on their own.
 const SUSTAIN = [0.5, 2.5];
 export const LIBRARY = {
-  piano: { label: 'Piano', family: 'Keys', icon: 'piano', program: 1, samples: 'piano', naming: 'salamander', release: 1 },
-  celesta: { label: 'Celesta', family: 'Keys', icon: 'bells', program: 9, samples: 'celesta', release: 1 },
-  music_box: { label: 'Music box', family: 'Keys', icon: 'bells', program: 11, samples: 'music_box', release: 1 },
-  church_organ: { label: 'Organ', family: 'Keys', icon: 'organ', program: 20, samples: 'church_organ', release: 0.5, loop: SUSTAIN },
-  accordion: { label: 'Accordion', family: 'Keys', icon: 'organ', program: 22, samples: 'accordion', release: 0.4, loop: SUSTAIN },
-  marimba: { label: 'Marimba', family: 'Percussion', icon: 'mallets', program: 13, samples: 'marimba', release: 0.6 },
-  xylophone: { label: 'Xylophone', family: 'Percussion', icon: 'mallets', program: 14, samples: 'xylophone', release: 0.4 },
-  vibraphone: { label: 'Vibraphone', family: 'Percussion', icon: 'mallets', program: 12, samples: 'vibraphone', release: 1.2 },
-  kalimba: { label: 'Kalimba', family: 'Percussion', icon: 'mallets', program: 109, samples: 'kalimba', release: 0.6 },
-  steel_drums: { label: 'Steel drums', family: 'Percussion', icon: 'drum', program: 115, samples: 'steel_drums', release: 0.6 },
-  guitar: { label: 'Guitar', family: 'Strings', icon: 'guitar', program: 25, samples: 'acoustic_guitar_nylon', release: 0.8 },
-  harp: { label: 'Harp', family: 'Strings', icon: 'harp', program: 47, samples: 'orchestral_harp', release: 1.2 },
-  violin: { label: 'Violin', family: 'Strings', icon: 'strings', program: 41, samples: 'violin', attack: 0.03, release: 0.5, loop: SUSTAIN },
-  cello: { label: 'Cello', family: 'Strings', icon: 'strings', program: 43, samples: 'cello', attack: 0.05, release: 0.6, loop: SUSTAIN },
-  strings: { label: 'Strings', family: 'Strings', icon: 'strings', program: 49, samples: 'string_ensemble_1', attack: 0.08, release: 0.8, loop: SUSTAIN },
-  pizzicato: { label: 'Pizzicato', family: 'Strings', icon: 'strings', program: 46, samples: 'pizzicato_strings', release: 0.4 },
-  chorus: { label: 'Chorus', family: 'Voices', icon: 'chorus', program: 53, samples: 'choir', attack: 0.05, release: 0.8, loop: SUSTAIN },
-  flute: { label: 'Flute', family: 'Winds', icon: 'flute', program: 74, samples: 'flute', release: 0.4, loop: SUSTAIN },
-  pan_flute: { label: 'Pan flute', family: 'Winds', icon: 'flute', program: 76, samples: 'pan_flute', release: 0.4, loop: SUSTAIN },
-  oboe: { label: 'Oboe', family: 'Winds', icon: 'reed', program: 69, samples: 'oboe', release: 0.4, loop: SUSTAIN },
-  clarinet: { label: 'Clarinet', family: 'Winds', icon: 'reed', program: 72, samples: 'clarinet', release: 0.4, loop: SUSTAIN },
-  trumpet: { label: 'Trumpet', family: 'Brass', icon: 'brass', program: 57, samples: 'trumpet', release: 0.4, loop: SUSTAIN },
-  french_horn: { label: 'French horn', family: 'Brass', icon: 'brass', program: 61, samples: 'french_horn', release: 0.5, loop: SUSTAIN },
+  piano: { family: 'Keys', icon: 'piano', program: 1, samples: 'piano', naming: 'salamander', release: 1 },
+  celesta: { family: 'Keys', icon: 'bells', program: 9, samples: 'celesta', release: 1 },
+  music_box: { family: 'Keys', icon: 'bells', program: 11, samples: 'music_box', release: 1 },
+  church_organ: { family: 'Keys', icon: 'organ', program: 20, samples: 'church_organ', release: 0.5, loop: SUSTAIN },
+  accordion: { family: 'Keys', icon: 'organ', program: 22, samples: 'accordion', release: 0.4, loop: SUSTAIN },
+  marimba: { family: 'Percussion', icon: 'mallets', program: 13, samples: 'marimba', release: 0.6 },
+  xylophone: { family: 'Percussion', icon: 'mallets', program: 14, samples: 'xylophone', release: 0.4 },
+  vibraphone: { family: 'Percussion', icon: 'mallets', program: 12, samples: 'vibraphone', release: 1.2 },
+  kalimba: { family: 'Percussion', icon: 'mallets', program: 109, samples: 'kalimba', release: 0.6 },
+  steel_drums: { family: 'Percussion', icon: 'drum', program: 115, samples: 'steel_drums', release: 0.6 },
+  guitar: { family: 'Strings', icon: 'guitar', program: 25, samples: 'acoustic_guitar_nylon', release: 0.8 },
+  harp: { family: 'Strings', icon: 'harp', program: 47, samples: 'orchestral_harp', release: 1.2 },
+  violin: { family: 'Strings', icon: 'strings', program: 41, samples: 'violin', attack: 0.03, release: 0.5, loop: SUSTAIN },
+  cello: { family: 'Strings', icon: 'strings', program: 43, samples: 'cello', attack: 0.05, release: 0.6, loop: SUSTAIN },
+  strings: { family: 'Strings', icon: 'strings', program: 49, samples: 'string_ensemble_1', attack: 0.08, release: 0.8, loop: SUSTAIN },
+  pizzicato: { family: 'Strings', icon: 'strings', program: 46, samples: 'pizzicato_strings', release: 0.4 },
+  chorus: { family: 'Voices', icon: 'chorus', program: 53, samples: 'choir', attack: 0.05, release: 0.8, loop: SUSTAIN },
+  flute: { family: 'Winds', icon: 'flute', program: 74, samples: 'flute', release: 0.4, loop: SUSTAIN },
+  pan_flute: { family: 'Winds', icon: 'flute', program: 76, samples: 'pan_flute', release: 0.4, loop: SUSTAIN },
+  oboe: { family: 'Winds', icon: 'reed', program: 69, samples: 'oboe', release: 0.4, loop: SUSTAIN },
+  clarinet: { family: 'Winds', icon: 'reed', program: 72, samples: 'clarinet', release: 0.4, loop: SUSTAIN },
+  trumpet: { family: 'Brass', icon: 'brass', program: 57, samples: 'trumpet', release: 0.4, loop: SUSTAIN },
+  french_horn: { family: 'Brass', icon: 'brass', program: 61, samples: 'french_horn', release: 0.5, loop: SUSTAIN },
 };
 
 export const DEFAULT_INSTRUMENTS = ['piano', 'chorus', 'flute'];

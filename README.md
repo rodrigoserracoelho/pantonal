@@ -41,6 +41,19 @@ Pantonal is an independent project, not affiliated with the House of Music Hunga
 The drawing modes autosave in the browser, support undo and redo, and let each
 drawing use up to six instruments from a library of 23.
 
+## Languages
+
+Pantonal speaks **English, French, Portuguese (European) and Dutch**. It picks
+the device's language on the first visit; the picker in the mode chooser and in
+About changes it, and the browser remembers the choice. Note names follow each
+language's music teaching: Do Ré Mi in French and Do3 for middle C, Dó Ré Mi in
+Portuguese (Dó3), and C, Cis, Es, Bes… in Dutch.
+
+Translations live in `src/i18n/`, one file per language with the same keys as
+`en.js`. To improve a translation, edit its file; to add a language, copy
+`en.js`, translate it and register it in `src/i18n.js` (name and note names).
+Corrections from native speakers are very welcome.
+
 ## Running
 
 Plain HTML, CSS and JavaScript: no build step and no dependencies to install.
@@ -68,6 +81,7 @@ host.
 | `src/echo.js` | Air Thinker's Echo game |
 | `src/scores.js` | Built-in melodies |
 | `src/icons.js` | The interface icons |
+| `src/i18n.js`, `src/i18n/` | Languages: translation files, note names, the language picker |
 | `samples/` | Instrument recordings |
 | `assets/`, `design/logo/` | Logo, app icons and the logo concepts |
 

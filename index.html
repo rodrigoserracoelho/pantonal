@@ -21,14 +21,14 @@
 <body>
   <div id="app">
     <!-- Left rail: what you draw with. -->
-    <nav id="toolbar" aria-label="Drawing tools">
-      <button class="brand" data-action="about" aria-label="About Pantonal">
+    <nav id="toolbar">
+      <button class="brand" data-action="about" aria-label="About Pantonal" data-i18n-attr="aria-label:action.about">
         <img src="assets/logo/pantonal-mark.svg" alt="" width="40" height="40">
       </button>
-      <button data-tool="brush" class="active drawing-only"><span class="icon" data-icon="brush"></span>Brush</button>
-      <button data-tool="erase" class="drawing-only"><span class="icon" data-icon="erase"></span>Erase</button>
-      <button data-tool="select" class="chromatic-only"><span class="icon" data-icon="select"></span>Select</button>
-      <button data-tool="pan" class="chromatic-only"><span class="icon" data-icon="pan"></span>Pan</button>
+      <button data-tool="brush" class="active drawing-only"><span class="icon" data-icon="brush"></span><span data-i18n="tool.brush">Brush</span></button>
+      <button data-tool="erase" class="drawing-only"><span class="icon" data-icon="erase"></span><span data-i18n="tool.erase">Erase</span></button>
+      <button data-tool="select" class="chromatic-only"><span class="icon" data-icon="select"></span><span data-i18n="tool.select">Select</span></button>
+      <button data-tool="pan" class="chromatic-only"><span class="icon" data-icon="pan"></span><span data-i18n="tool.pan">Pan</span></button>
       <hr class="drawing-only">
       <div id="instruments" class="drawing-only"></div>
     </nav>
@@ -36,19 +36,19 @@
     <main>
       <!-- Top bar: what you do with the drawing. -->
       <header id="topbar">
-        <button data-action="mode"><span class="icon" data-icon="mode"></span>Mode</button>
+        <button data-action="mode"><span class="icon" data-icon="mode"></span><span data-i18n="action.mode">Mode</span></button>
         <span class="divider drawing-only"></span>
-        <button data-action="undo" class="drawing-only"><span class="icon" data-icon="undo"></span>Undo</button>
-        <button data-action="redo" class="drawing-only"><span class="icon" data-icon="redo"></span>Redo</button>
-        <button data-action="clear" class="drawing-only"><span class="icon" data-icon="clear"></span>Clear</button>
+        <button data-action="undo" class="drawing-only"><span class="icon" data-icon="undo"></span><span data-i18n="action.undo">Undo</span></button>
+        <button data-action="redo" class="drawing-only"><span class="icon" data-icon="redo"></span><span data-i18n="action.redo">Redo</span></button>
+        <button data-action="clear" class="drawing-only"><span class="icon" data-icon="clear"></span><span data-i18n="action.clear">Clear</span></button>
         <span class="divider drawing-only"></span>
-        <button data-action="instruments" class="drawing-only"><span class="icon" data-icon="instruments"></span>Instruments</button>
-        <button data-action="score" class="chromatic-only"><span class="icon" data-icon="score"></span>Score</button>
-        <button data-action="export" class="chromatic-only"><span class="icon" data-icon="export"></span>Export</button>
-        <button data-action="settings" class="no-free" aria-pressed="false"><span class="icon" data-icon="settings"></span>Settings</button>
+        <button data-action="instruments" class="drawing-only"><span class="icon" data-icon="instruments"></span><span data-i18n="action.instruments">Instruments</span></button>
+        <button data-action="score" class="chromatic-only"><span class="icon" data-icon="score"></span><span data-i18n="action.score">Score</span></button>
+        <button data-action="export" class="chromatic-only"><span class="icon" data-icon="export"></span><span data-i18n="action.export">Export</span></button>
+        <button data-action="settings" class="no-free" aria-pressed="false"><span class="icon" data-icon="settings"></span><span data-i18n="action.settings">Settings</span></button>
         <button data-action="scale" class="air-only" aria-expanded="false" aria-controls="scale-menu"><span class="icon" data-icon="scale"></span><span class="label">Free</span></button>
-        <button data-action="echo" class="air-only" aria-pressed="false"><span class="icon" data-icon="echo"></span>Echo</button>
-        <button id="play"><span class="icon" data-icon="play"></span><span class="label">Play</span></button>
+        <button data-action="echo" class="air-only" aria-pressed="false"><span class="icon" data-icon="echo"></span><span data-i18n="action.echo">Echo</span></button>
+        <button id="play"><span class="icon" data-icon="play"></span><span class="label" data-i18n="action.play">Play</span></button>
       </header>
 
       <div id="stage">
@@ -57,11 +57,11 @@
 
         <!-- Air Thinker: the scale and key the pitch snaps to. -->
         <div id="scale-menu" hidden>
-          <h4>Key</h4>
+          <h4 data-i18n="scale.key">Key</h4>
           <div id="key-options" class="keys"></div>
           <p id="scale-hint"></p>
           <div class="scale-extra">
-            <button id="scale-hear"><span class="icon" data-icon="play"></span>Hear it</button>
+            <button id="scale-hear"><span class="icon" data-icon="play"></span><span data-i18n="scale.hear">Hear it</span></button>
             <p id="scale-fact"></p>
           </div>
           <div id="scale-options"></div>
@@ -72,14 +72,14 @@
           <div id="echo-dots"></div>
           <p id="echo-status"></p>
           <div class="echo-buttons">
-            <button data-echo="replay">Hear again</button>
-            <button data-echo="next">New phrase</button>
+            <button data-echo="replay" data-i18n="echo.replay">Hear again</button>
+            <button data-echo="next" data-i18n="echo.next">New phrase</button>
           </div>
         </div>
 
         <!-- Air Thinker: how to play, shown until a hand is in view. -->
         <div id="air-guide" hidden>
-          <svg class="theremin" viewBox="-34 0 404 280" role="img" aria-label="A theremin: a wooden box on a stand, with a vertical antenna on the right for pitch and a loop on the left for volume, and a hand near each">
+          <svg class="theremin" viewBox="-34 0 404 280" role="img" aria-label="A theremin" data-i18n-attr="aria-label:guide.alt">
             <!-- field around the pitch antenna -->
             <g fill="none" stroke="#2fb9d3" stroke-width="2.5" stroke-linecap="round">
               <path d="M262 74a16 16 0 0 1 0 30" opacity="0.6"/>
@@ -115,42 +115,42 @@
               <path d="M-8 108V88M-14 94l6-6 6 6M-8 136v20M-14 150l6 6 6-6" stroke="#f2a35e"/>
             </g>
             <g font-family="Fredoka, system-ui, sans-serif" font-weight="600" font-size="14" text-anchor="middle">
-              <text x="342" y="38" fill="#2fb9d3">higher</text>
-              <text x="342" y="156" fill="#2fb9d3">lower</text>
-              <text x="-8" y="78" fill="#f2a35e">louder</text>
-              <text x="-8" y="174" fill="#f2a35e">softer</text>
+              <text x="342" y="38" fill="#2fb9d3" data-i18n="guide.higher">higher</text>
+              <text x="342" y="156" fill="#2fb9d3" data-i18n="guide.lower">lower</text>
+              <text x="-8" y="78" fill="#f2a35e" data-i18n="guide.louder">louder</text>
+              <text x="-8" y="174" fill="#f2a35e" data-i18n="guide.softer">softer</text>
             </g>
           </svg>
           <div class="air-guide-text">
-            <h2>Play it like a theremin</h2>
-            <p class="fact">The theremin, invented by Leon Theremin around 1920, is played without touching it.</p>
+            <h2 data-i18n="guide.title">Play it like a theremin</h2>
+            <p class="fact" data-i18n="guide.fact"></p>
             <ul>
-              <li><span class="dot pitch"></span><span><strong>Right hand</strong>: up is higher, down is lower.</span></li>
-              <li><span class="dot closed"></span><span><strong>Close your hand</strong> to stop the sound.</span></li>
-              <li><span class="dot volume"></span><span><strong>Left hand</strong> (optional): up is louder.</span></li>
+              <li><span class="dot pitch"></span><span data-i18n-html="guide.right.html"></span></li>
+              <li><span class="dot closed"></span><span data-i18n-html="guide.fist.html"></span></li>
+              <li><span class="dot volume"></span><span data-i18n-html="guide.left.html"></span></li>
             </ul>
             <p id="air-guide-status"></p>
           </div>
         </div>
         <div id="select-bar" hidden>
-          <button data-select="copy">Copy</button>
-          <button data-select="paste">Paste</button>
-          <button data-select="delete">Delete</button>
+          <button data-select="copy" data-i18n="select.copy">Copy</button>
+          <button data-select="paste" data-i18n="select.paste">Paste</button>
+          <button data-select="delete" data-i18n="select.delete">Delete</button>
         </div>
       </div>
 
       <footer id="controls">
-        <label>Time / screen <input type="range" id="duration" min="2" max="60" step="1"><output></output></label>
-        <label>Octaves / screen <input type="range" id="octaves" min="1" max="9" step="1"><output></output></label>
-        <label>Steps / screen <input type="range" id="cols" min="16" max="256" step="4"><output></output></label>
-        <label class="check"><input type="checkbox" id="grid"> Grid</label>
-        <label class="check"><input type="checkbox" id="loop"> Loop</label>
+        <label><span data-i18n="settings.duration">Time / screen</span> <input type="range" id="duration" min="2" max="60" step="1"><output></output></label>
+        <label><span data-i18n="settings.octaves">Octaves / screen</span> <input type="range" id="octaves" min="1" max="9" step="1"><output></output></label>
+        <label><span data-i18n="settings.cols">Steps / screen</span> <input type="range" id="cols" min="16" max="256" step="4"><output></output></label>
+        <label class="check"><input type="checkbox" id="grid"> <span data-i18n="settings.grid">Grid</span></label>
+        <label class="check"><input type="checkbox" id="loop"> <span data-i18n="settings.loop">Loop</span></label>
       </footer>
 
       <footer id="air-controls">
-        <label>Vibrato depth <input type="range" id="vibratoDepth" min="0" max="80" step="1"><output></output></label>
-        <label>Vibrato speed <input type="range" id="vibratoRate" min="2" max="9" step="0.5"><output></output></label>
-        <label class="check"><input type="checkbox" id="showTheremin"> Theremin</label>
+        <label><span data-i18n="settings.vibratoDepth">Vibrato depth</span> <input type="range" id="vibratoDepth" min="0" max="80" step="1"><output></output></label>
+        <label><span data-i18n="settings.vibratoRate">Vibrato speed</span> <input type="range" id="vibratoRate" min="2" max="9" step="0.5"><output></output></label>
+        <label class="check"><input type="checkbox" id="showTheremin"> <span data-i18n="settings.theremin">Theremin</span></label>
       </footer>
     </main>
   </div>
@@ -160,31 +160,32 @@
       <img src="assets/logo/pantonal-mark.svg" alt="" width="64" height="64">
       <span>pantonal</span>
     </h1>
-    <p class="subtitle">How do you want to think today?</p>
+    <p class="subtitle" data-i18n="mode.question">How do you want to think today?</p>
     <button id="mode-continue" hidden>
-      Continue your last drawing
+      <span data-i18n="mode.continue">Continue your last drawing</span>
       <small></small>
     </button>
     <div class="modes">
       <button data-mode="free">
         <span class="icon" data-icon="free"></span>
-        <strong>Free Thinker</strong>
-        <span>Draw freely. Lines glide through every pitch: no grid, no rules.</span>
+        <strong data-i18n="mode.free">Free Thinker</strong>
+        <span data-i18n="mode.free.desc"></span>
       </button>
       <button data-mode="chromatic">
         <span class="icon" data-icon="piano"></span>
-        <strong>Chromatic Thinker</strong>
-        <span>The 12 notes on a grid. Instrument layers, scores, copy &amp; paste, export to MuseScore.</span>
+        <strong data-i18n="mode.chromatic">Chromatic Thinker</strong>
+        <span data-i18n="mode.chromatic.desc"></span>
       </button>
       <button data-mode="air">
         <span class="icon" data-icon="hand"></span>
-        <strong>Air Thinker</strong>
-        <span>Play with your hands in the air, like a theremin. Uses the camera; the video never leaves this device.</span>
+        <strong data-i18n="mode.air">Air Thinker</strong>
+        <span data-i18n="mode.air.desc"></span>
       </button>
     </div>
-    <p id="mode-warning" hidden>Switching mode clears the current drawing.</p>
-    <button id="mode-cancel" hidden>Cancel</button>
-    <button id="mode-about" class="link-button" data-action="about">About Pantonal</button>
+    <p id="mode-warning" hidden data-i18n="mode.warning"></p>
+    <button id="mode-cancel" hidden data-i18n="mode.cancel">Cancel</button>
+    <div class="language-picker" role="group" aria-label="Language" data-i18n-attr="aria-label:language"></div>
+    <button id="mode-about" class="link-button" data-action="about" data-i18n="action.about">About Pantonal</button>
   </dialog>
 
   <dialog id="about-dialog">
@@ -192,49 +193,37 @@
       <img src="assets/logo/pantonal-mark.svg" alt="" width="44" height="44">
       <span>pantonal</span>
     </h2>
-    <p>
-      Pantonal turns drawings into music. Draw lines on a canvas and hear them played:
-      left to right is time, bottom to top is pitch. <strong>Free Thinker</strong> lets lines
-      glide through every pitch; <strong>Chromatic Thinker</strong> places them on the twelve
-      notes of the chromatic scale, with instrument layers, scores and export to MuseScore;
-      <strong>Air Thinker</strong> turns the camera into a theremin you play with your hands.
-    </p>
+    <p data-i18n-html="about.intro.html"></p>
 
-    <h3>Inspiration</h3>
-    <p>
-      Pantonal was inspired by an interactive drawing-to-music installation at the
-      House of Music Hungary (Magyar Zene Háza) in Budapest, discovered during a visit in
-      October 2026. It stood in the exhibition’s section on twelve-note music, hence the name.
-      Pantonal is an independent project, not affiliated with the House of Music Hungary.
-    </p>
+    <h3 data-i18n="about.inspiration.title">Inspiration</h3>
+    <p data-i18n="about.inspiration"></p>
 
-    <h3>Credits</h3>
+    <h3 data-i18n="about.credits">Credits</h3>
     <ul>
-      <li>Piano: Salamander Grand Piano by Alexander Holm, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>.</li>
-      <li>All other instruments: FluidR3_GM soundfont by Frank Wen, via <a href="https://github.com/gleitz/midi-js-soundfonts" target="_blank" rel="noopener">midi-js-soundfonts</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>.</li>
-      <li>Audio engine: <a href="https://tonejs.github.io/" target="_blank" rel="noopener">Tone.js</a> by Yotam Mann, MIT License.</li>
-      <li>Hand tracking (Air Thinker): <a href="https://ai.google.dev/edge/mediapipe" target="_blank" rel="noopener">MediaPipe</a> by Google, Apache License 2.0. It runs on this device only; the camera image is never sent or stored.</li>
-      <li>Typeface: <a href="https://fonts.google.com/specimen/Fredoka" target="_blank" rel="noopener">Fredoka</a>, SIL Open Font License.</li>
+      <li data-i18n-html="about.piano.html"></li>
+      <li data-i18n-html="about.instruments.html"></li>
+      <li data-i18n-html="about.engine.html"></li>
+      <li data-i18n-html="about.tracking.html"></li>
+      <li data-i18n-html="about.font.html"></li>
     </ul>
-    <p class="about-license">
-      Pantonal is open source under the MIT License:
-      <a href="https://github.com/rodrigoserracoelho/pantonal" target="_blank" rel="noopener">source code on GitHub</a>.
-    </p>
+    <p class="about-license" data-i18n-html="about.license.html"></p>
+
+    <div class="language-picker" role="group" aria-label="Language" data-i18n-attr="aria-label:language"></div>
 
     <div class="dialog-buttons">
-      <button id="about-close" class="primary">Close</button>
+      <button id="about-close" class="primary" data-i18n="about.close">Close</button>
     </div>
   </dialog>
 
   <dialog id="instruments-dialog">
-    <h2>Instruments</h2>
+    <h2 data-i18n="inst.title">Instruments</h2>
     <p id="instruments-note" class="dialog-note"></p>
-    <h3>In this drawing</h3>
+    <h3 data-i18n="inst.current">In this drawing</h3>
     <div id="session-instruments" class="instrument-grid"></div>
-    <h3>Add</h3>
+    <h3 data-i18n="inst.add">Add</h3>
     <div id="library-instruments"></div>
     <div class="dialog-buttons">
-      <button id="instruments-close" class="primary">Done</button>
+      <button id="instruments-close" class="primary" data-i18n="inst.done">Done</button>
     </div>
   </dialog>
 
@@ -242,10 +231,10 @@
     <h2 id="import-title"></h2>
     <p id="import-error"></p>
     <div id="import-parts"></div>
-    <p class="import-note">Importing replaces the current drawing. Undo brings it back.</p>
+    <p class="import-note" data-i18n="import.note"></p>
     <div class="dialog-buttons">
-      <button id="import-cancel">Cancel</button>
-      <button id="import-confirm" class="primary">Import</button>
+      <button id="import-cancel" data-i18n="import.cancel">Cancel</button>
+      <button id="import-confirm" class="primary" data-i18n="import.confirm">Import</button>
     </div>
   </dialog>
   <input type="file" id="import-file" accept=".musicxml,.xml,.mxl" hidden>

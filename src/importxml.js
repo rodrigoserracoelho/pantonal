@@ -1,7 +1,8 @@
 // Reads MusicXML scores (.musicxml / .xml, or compressed .mxl) into parts of
 // notes, with times in quarter notes and sounding MIDI pitches. Covers rests,
 // chords, ties, voices (backup/forward) and transposing instruments; grace
-// notes, cue notes, unpitched percussion and repeats are skipped.
+// notes, cue notes, unpitched percussion and repeats are skipped. Errors carry
+// a translation key as their message.
 
 const STEP_SEMITONES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
@@ -30,10 +31,10 @@ export async function readScoreFile(file) {
 
 export function parseMusicXML(doc) {
   const root = doc.documentElement;
-  if (root?.nodeName === 'score-timewise') throw new Error('Timewise MusicXML is not supported yet.');
-  if (root?.nodeName !== 'score-partwise') throw new Error('This file is not a MusicXML score.');
+  if (root?.nodeName === 'score-timewise') throw new Error('import.error.timewise');
+  if (root?.nodeName !== 'score-partwise') throw new Error('import.error.notScore');
 
-  const title = text(child(root, 'work'), 'work-title') || text(root, 'movement-title') || 'Untitled score';
+  const title = text(child(root, 'work'), 'work-title') || text(root, 'movement-title') || '';
   const names = {};
   for (const scorePart of elements(child(root, 'part-list') ?? root, 'score-part')) {
     names[scorePart.getAttribute('id')] = text(scorePart, 'part-name') || scorePart.getAttribute('id');
@@ -127,7 +128,7 @@ async function mxlToXml(bytes) {
     path = doc.getElementsByTagName('rootfile').item(0)?.getAttribute('full-path');
   }
   path ??= [...files.keys()].find((name) => !name.startsWith('META-INF/') && /\.(musicxml|xml)$/.test(name));
-  if (!files.has(path)) throw new Error('No score was found inside the .mxl file.');
+  if (!files.has(path)) throw new Error('import.error.noScore');
   return inflate(files.get(path));
 }
 
@@ -136,7 +137,7 @@ function unzip(bytes) {
   const data = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   let end = bytes.length - 22;
   while (end >= 0 && data.getUint32(end, true) !== 0x06054b50) end--;
-  if (end < 0) throw new Error('This .mxl file is damaged.');
+  if (end < 0) throw new Error('import.error.damaged');
 
   const files = new Map();
   let p = data.getUint32(end + 16, true);
@@ -156,7 +157,7 @@ function unzip(bytes) {
 
 async function inflate({ method, bytes }) {
   if (method === 0) return new TextDecoder().decode(bytes);
-  if (method !== 8) throw new Error('This .mxl file uses an unsupported compression.');
+  if (method !== 8) throw new Error('import.error.compression');
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
   return new Response(stream).text();
 }

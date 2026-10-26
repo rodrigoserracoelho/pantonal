@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" color="#1c1c1f" role="img" aria-label="A glide, a cluster and a note over twelve pitch lines">
+  <g stroke="currentColor" stroke-opacity="0.2" stroke-width="2" stroke-linecap="round">
+  <line x1="14" y1="16" x2="106" y2="16"/>
+  <line x1="14" y1="24" x2="106" y2="24"/>
+  <line x1="14" y1="32" x2="106" y2="32"/>
+  <line x1="14" y1="40" x2="106" y2="40"/>
+  <line x1="14" y1="48" x2="106" y2="48"/>
+  <line x1="14" y1="56" x2="106" y2="56"/>
+  <line x1="14" y1="64" x2="106" y2="64"/>
+  <line x1="14" y1="72" x2="106" y2="72"/>
+  <line x1="14" y1="80" x2="106" y2="80"/>
+  <line x1="14" y1="88" x2="106" y2="88"/>
+  <line x1="14" y1="96" x2="106" y2="96"/>
+  <line x1="14" y1="104" x2="106" y2="104"/>
+  </g>
+  <path d="M28 22 V 50" stroke="#f2a35e" stroke-width="10" stroke-linecap="round"/>
+  <path d="M70 98 H 96" stroke="#c98fc4" stroke-width="10" stroke-linecap="round"/>
+  <path d="M20 88 C 38 88, 40 34, 60 40 S 82 94, 100 30" fill="none" stroke="#2fb9d3" stroke-width="10" stroke-linecap="round"/>
+</svg>

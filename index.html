@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Pantonal</title>
+  <meta name="description" content="Draw music on a 12-note canvas.">
+  <meta name="theme-color" content="#1c1c1f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Pantonal">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" href="vendor/fonts/fredoka-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/Tone.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Left rail: what you draw with. -->
+    <nav id="toolbar" aria-label="Drawing tools">
+      <button class="brand" data-action="about" aria-label="About Pantonal">
+        <img src="assets/logo/pantonal-mark.svg" alt="" width="40" height="40">
+      </button>
+      <button data-tool="brush" class="active"><span class="icon" data-icon="brush"></span>Brush</button>
+      <button data-tool="erase"><span class="icon" data-icon="erase"></span>Erase</button>
+      <button data-tool="select" class="chromatic-only"><span class="icon" data-icon="select"></span>Select</button>
+      <button data-tool="pan" class="chromatic-only"><span class="icon" data-icon="pan"></span>Pan</button>
+      <hr>
+      <div id="instruments"></div>
+    </nav>
+
+    <main>
+      <!-- Top bar: what you do with the drawing. -->
+      <header id="topbar">
+        <button data-action="mode"><span class="icon" data-icon="mode"></span>Mode</button>
+        <span class="divider"></span>
+        <button data-action="undo"><span class="icon" data-icon="undo"></span>Undo</button>
+        <button data-action="redo"><span class="icon" data-icon="redo"></span>Redo</button>
+        <button data-action="clear"><span class="icon" data-icon="clear"></span>Clear</button>
+        <span class="divider"></span>
+        <button data-action="instruments"><span class="icon" data-icon="instruments"></span>Instruments</button>
+        <button data-action="score" class="chromatic-only"><span class="icon" data-icon="score"></span>Score</button>
+        <button data-action="export" class="chromatic-only"><span class="icon" data-icon="export"></span>Export</button>
+        <button data-action="settings" class="chromatic-only" aria-pressed="false"><span class="icon" data-icon="settings"></span>Settings</button>
+        <button id="play"><span class="icon" data-icon="play"></span><span class="label">Play</span></button>
+      </header>
+
+      <div id="stage">
+        <canvas id="canvas"></canvas>
+        <div id="score-menu" hidden></div>
+        <div id="select-bar" hidden>
+          <button data-select="copy">Copy</button>
+          <button data-select="paste">Paste</button>
+          <button data-select="delete">Delete</button>
+        </div>
+      </div>
+
+      <footer id="controls" class="chromatic-only" hidden>
+        <label>Time / screen <input type="range" id="duration" min="2" max="60" step="1"><output></output></label>
+        <label>Octaves / screen <input type="range" id="octaves" min="1" max="9" step="1"><output></output></label>
+        <label>Steps / screen <input type="range" id="cols" min="16" max="256" step="4"><output></output></label>
+        <label class="check"><input type="checkbox" id="grid"> Grid</label>
+        <label class="check"><input type="checkbox" id="loop"> Loop</label>
+      </footer>
+    </main>
+  </div>
+
+  <dialog id="mode-dialog">
+    <h1 class="lockup">
+      <img src="assets/logo/pantonal-mark.svg" alt="" width="64" height="64">
+      <span>pantonal</span>
+    </h1>
+    <p class="subtitle">How do you want to think today?</p>
+    <button id="mode-continue" hidden>
+      Continue your last drawing
+      <small></small>
+    </button>
+    <div class="modes">
+      <button data-mode="free">
+        <span class="icon" data-icon="free"></span>
+        <strong>Free Thinker</strong>
+        <span>Draw freely. Lines glide through every pitch: no grid, no rules.</span>
+      </button>
+      <button data-mode="chromatic">
+        <span class="icon" data-icon="piano"></span>
+        <strong>Chromatic Thinker</strong>
+        <span>The 12 notes on a grid. Instrument layers, scores, copy &amp; paste, export to MuseScore.</span>
+      </button>
+    </div>
+    <p id="mode-warning" hidden>Switching mode clears the current drawing.</p>
+    <button id="mode-cancel" hidden>Cancel</button>
+    <button id="mode-about" class="link-button" data-action="about">About Pantonal</button>
+  </dialog>
+
+  <dialog id="about-dialog">
+    <h2 class="lockup">
+      <img src="assets/logo/pantonal-mark.svg" alt="" width="44" height="44">
+      <span>pantonal</span>
+    </h2>
+    <p>
+      Pantonal turns drawings into music. Draw lines on a canvas and hear them played:
+      left to right is time, bottom to top is pitch. <strong>Free Thinker</strong> lets lines
+      glide through every pitch; <strong>Chromatic Thinker</strong> places them on the twelve
+      notes of the chromatic scale, with instrument layers, scores and export to MuseScore.
+    </p>
+
+    <h3>Inspiration</h3>
+    <p>
+      Pantonal was inspired by an interactive drawing-to-music installation at the
+      House of Music Hungary (Magyar Zene Háza) in Budapest, discovered during a visit in
+      October 2026. It stood in the exhibition’s section on twelve-note music, hence the name.
+      Pantonal is an independent project, not affiliated with the House of Music Hungary.
+    </p>
+
+    <h3>Credits</h3>
+    <ul>
+      <li>Piano: Salamander Grand Piano by Alexander Holm, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>.</li>
+      <li>All other instruments: FluidR3_GM soundfont by Frank Wen, via <a href="https://github.com/gleitz/midi-js-soundfonts" target="_blank" rel="noopener">midi-js-soundfonts</a>, <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener">CC BY 3.0</a>.</li>
+      <li>Audio engine: <a href="https://tonejs.github.io/" target="_blank" rel="noopener">Tone.js</a> by Yotam Mann, MIT License.</li>
+      <li>Typeface: <a href="https://fonts.google.com/specimen/Fredoka" target="_blank" rel="noopener">Fredoka</a>, SIL Open Font License.</li>
+    </ul>
+    <p class="about-license">Pantonal is open source under the MIT License.</p>
+
+    <div class="dialog-buttons">
+      <button id="about-close" class="primary">Close</button>
+    </div>
+  </dialog>
+
+  <dialog id="instruments-dialog">
+    <h2>Instruments</h2>
+    <p id="instruments-note" class="dialog-note"></p>
+    <h3>In this drawing</h3>
+    <div id="session-instruments" class="instrument-grid"></div>
+    <h3>Add</h3>
+    <div id="library-instruments"></div>
+    <div class="dialog-buttons">
+      <button id="instruments-close" class="primary">Done</button>
+    </div>
+  </dialog>
+
+  <dialog id="import-dialog">
+    <h2 id="import-title"></h2>
+    <p id="import-error"></p>
+    <div id="import-parts"></div>
+    <p class="import-note">Importing replaces the current drawing. Undo brings it back.</p>
+    <div class="dialog-buttons">
+      <button id="import-cancel">Cancel</button>
+      <button id="import-confirm" class="primary">Import</button>
+    </div>
+  </dialog>
+  <input type="file" id="import-file" accept=".musicxml,.xml,.mxl" hidden>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

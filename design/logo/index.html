@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pantonal logo concepts</title>
+  <style>
+    @font-face {
+      font-family: 'Fredoka';
+      font-weight: 600;
+      src: url('../../vendor/fonts/fredoka-600-latin.woff2') format('woff2');
+    }
+    body {
+      margin: 0;
+      padding: 40px 16px;
+      background: #fbfaf7;
+      color: #1c1c1f;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    main { max-width: 1040px; margin: 0 auto; }
+    h1, h2 { font-family: 'Fredoka', system-ui, sans-serif; font-weight: 600; }
+    h1 { margin: 0 0 8px; font-size: 40px; }
+    h2 { margin: 48px 0 16px; font-size: 24px; }
+    p { margin: 0; color: #5f5b52; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    figure {
+      margin: 0;
+      padding: 20px;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 0 0 1px #ebe8e0;
+    }
+    figure.chosen { box-shadow: 0 0 0 3px #f2a35e; }
+    figure img { display: block; width: 120px; height: 120px; margin: 0 auto 12px; }
+    figcaption strong { display: block; }
+    figcaption { font-size: 14px; color: #5f5b52; }
+    .final { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
+    .lockup {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-family: 'Fredoka', system-ui, sans-serif;
+      font-size: 48px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .lockup.light { background: #fff; box-shadow: 0 0 0 1px #ebe8e0; }
+    .lockup.dark { background: #1c1c1f; color: #fbfaf7; }
+    .icons { display: flex; gap: 16px; align-items: flex-end; }
+    .icons img { border-radius: 22%; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Pantonal logo</h1>
+  <p>The chosen mark is B2: the letter P, its stem a vertical cluster and its bowl made of notes, in the three instrument colours.</p>
+
+  <h2>Final</h2>
+  <div class="final">
+    <div class="lockup light"><img src="../../assets/logo/pantonal-mark.svg" alt="" width="64" height="64">pantonal</div>
+    <div class="lockup dark"><img src="../../assets/logo/pantonal-mark.svg" alt="" width="64" height="64">pantonal</div>
+    <div class="icons">
+      <img src="../../assets/icons/icon-192.png" alt="App icon, 96 px" width="96" height="96">
+      <img src="../../assets/icons/icon-192.png" alt="App icon, 48 px" width="48" height="48">
+      <img src="../../assets/icons/favicon.svg" alt="Favicon, 32 px" width="32" height="32">
+    </div>
+  </div>
+
+  <h2>First concepts</h2>
+  <div class="grid">
+    <figure><img src="concepts/A-twelve.svg" alt=""><figcaption><strong>A · Twelve</strong>Twelve notes in a circle with a drawn line.</figcaption></figure>
+    <figure><img src="concepts/B-piano-roll.svg" alt=""><figcaption><strong>B · Piano-roll P</strong>The letter P built from piano-roll notes, with a playhead.</figcaption></figure>
+    <figure><img src="concepts/C-glissando.svg" alt=""><figcaption><strong>C · Glissando</strong>A glide, a cluster and a note over twelve pitch lines.</figcaption></figure>
+    <figure><img src="concepts/D-octave.svg" alt=""><figcaption><strong>D · Octave</strong>The twelve keys of an octave with a drawn line.</figcaption></figure>
+  </div>
+
+  <h2>Variations on B</h2>
+  <div class="grid">
+    <figure><img src="concepts/B1-refined.svg" alt=""><figcaption><strong>B1 · Refined</strong>Ink stem, coloured bowl, faint playhead.</figcaption></figure>
+    <figure class="chosen"><img src="concepts/B2-cluster-stem.svg" alt=""><figcaption><strong>B2 · Cluster stem (chosen)</strong>A vertical cluster as the stem, notes for the bowl.</figcaption></figure>
+    <figure><img src="concepts/B3-playing.svg" alt=""><figcaption><strong>B3 · Playing</strong>B1 with a yellow playhead.</figcaption></figure>
+    <figure><img src="concepts/B4-bold.svg" alt=""><figcaption><strong>B4 · Bold</strong>Fewer, thicker bars for small sizes.</figcaption></figure>
+  </div>
+</main>
+</body>
+</html>

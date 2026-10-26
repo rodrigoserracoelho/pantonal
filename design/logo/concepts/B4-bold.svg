@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" color="#1c1c1f" role="img" aria-label="B with fewer, thicker bars for small sizes">
+  <rect x="22" y="9" width="66" height="22" rx="11" fill="#2fb9d3"/>
+  <rect x="22" y="37" width="24" height="22" rx="11" fill="currentColor"/>
+  <rect x="66" y="37" width="32" height="22" rx="11" fill="#c98fc4"/>
+  <rect x="22" y="65" width="66" height="22" rx="11" fill="#f2a35e"/>
+  <rect x="22" y="93" width="24" height="22" rx="11" fill="currentColor"/>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-label="Pantonal">
+  <!-- Horizontal lockup. The wordmark is set in Fredoka SemiBold
+       (vendor/fonts); where that font isn't installed, it falls back. -->
+  <rect x="26" y="14" width="18" height="96" rx="9" fill="#f2a35e"/>
+  <rect x="50" y="14" width="36" height="16" rx="8" fill="#2fb9d3"/>
+  <rect x="72" y="34" width="24" height="16" rx="8" fill="#c98fc4"/>
+  <rect x="50" y="54" width="36" height="16" rx="8" fill="#2fb9d3"/>
+  <text x="118" y="84" fill="#1c1c1f" font-family="Fredoka, 'Baloo 2', 'Nunito', system-ui, sans-serif" font-weight="600" font-size="68" letter-spacing="-0.5">pantonal</text>
+</svg>

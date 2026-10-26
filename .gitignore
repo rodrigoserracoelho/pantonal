@@ -1,0 +1,4 @@
+# Deploy package, rebuilt from the sources
+dist/
+
+.DS_Store

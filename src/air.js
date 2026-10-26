@@ -16,6 +16,54 @@ const WRIST = 0;
 const PALM = 9; // base of the middle finger: steadier than a fingertip
 const FINGERTIPS = [8, 12, 16, 20];
 
+// Scales the pitch can snap to: pitch classes above the key, grouped as the
+// scale menu shows them. Free glides through every pitch, like a real theremin.
+// Makams and ragas are played as their notes in 12-tone tuning, so only those
+// that keep their character there are listed; for ragas the key is Sa.
+export const SCALES = {
+  free: { group: 'Scales', label: 'Free', notes: null },
+  chromatic: { group: 'Scales', label: 'Chromatic', notes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
+  major: { group: 'Scales', label: 'Major', notes: [0, 2, 4, 5, 7, 9, 11] },
+  major_pentatonic: { group: 'Scales', label: 'Major Pentatonic', notes: [0, 2, 4, 7, 9] },
+  minor_pentatonic: { group: 'Scales', label: 'Minor Pentatonic', notes: [0, 3, 5, 7, 10] },
+  japanese_in: { group: 'Scales', label: 'Japanese In', notes: [0, 1, 5, 7, 8] },
+  natural_minor: { group: 'Minor', label: 'Natural', notes: [0, 2, 3, 5, 7, 8, 10] },
+  harmonic_minor: { group: 'Minor', label: 'Harmonic', notes: [0, 2, 3, 5, 7, 8, 11] },
+  melodic_minor: { group: 'Minor', label: 'Melodic', notes: [0, 2, 3, 5, 7, 9, 11] }, // ascending form
+  hungarian_minor: { group: 'Minor', label: 'Hungarian', notes: [0, 2, 3, 6, 7, 8, 11] },
+  neapolitan_minor: { group: 'Minor', label: 'Neapolitan', notes: [0, 1, 3, 5, 7, 8, 11] },
+  dorian: { group: 'Modes', label: 'Dorian', notes: [0, 2, 3, 5, 7, 9, 10] },
+  phrygian: { group: 'Modes', label: 'Phrygian', notes: [0, 1, 3, 5, 7, 8, 10] },
+  lydian: { group: 'Modes', label: 'Lydian', notes: [0, 2, 4, 6, 7, 9, 11] },
+  mixolydian: { group: 'Modes', label: 'Mixolydian', notes: [0, 2, 4, 5, 7, 9, 10] },
+  locrian: { group: 'Modes', label: 'Locrian', notes: [0, 1, 3, 5, 6, 8, 10] },
+  hicaz: { group: 'Turkish makams', label: 'Hicaz', notes: [0, 1, 4, 5, 7, 8, 10] },
+  hicazkar: { group: 'Turkish makams', label: 'Hicazkar', notes: [0, 1, 4, 5, 7, 8, 11] },
+  kurdi: { group: 'Turkish makams', label: 'Kürdi', notes: [0, 1, 3, 5, 7, 8, 10] },
+  nikriz: { group: 'Turkish makams', label: 'Nikriz', notes: [0, 2, 3, 6, 7, 9, 10] },
+  suzinak: { group: 'Turkish makams', label: 'Suzinak', notes: [0, 2, 4, 5, 7, 8, 11] },
+  yaman: { group: 'Indian ragas', label: 'Yaman', notes: [0, 2, 4, 6, 7, 9, 11] },
+  bhairav: { group: 'Indian ragas', label: 'Bhairav', notes: [0, 1, 4, 5, 7, 8, 11] },
+  bhairavi: { group: 'Indian ragas', label: 'Bhairavi', notes: [0, 1, 3, 5, 7, 8, 10] },
+  todi: { group: 'Indian ragas', label: 'Todi', notes: [0, 1, 3, 6, 7, 8, 11] },
+  purvi: { group: 'Indian ragas', label: 'Purvi', notes: [0, 1, 4, 6, 7, 8, 11] },
+  marwa: { group: 'Indian ragas', label: 'Marwa', notes: [0, 1, 4, 6, 9, 11] }, // no Pa
+  malkauns: { group: 'Indian ragas', label: 'Malkauns', notes: [0, 3, 5, 8, 10] },
+  hamsadhwani: { group: 'Indian ragas', label: 'Hamsadhwani', notes: [0, 2, 4, 7, 11] },
+};
+export const KEY_NAMES = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
+
+// The note of the scale nearest to `midi`. No scale has a gap wider than four
+// semitones, so looking six either way always finds one.
+export function snapToScale(midi, notes, key) {
+  let best = null;
+  for (let m = Math.floor(midi) - 6; m <= Math.ceil(midi) + 6; m++) {
+    const inScale = notes.includes((((m - key) % 12) + 12) % 12);
+    if (inScale && (best === null || Math.abs(m - midi) < Math.abs(best - midi))) best = m;
+  }
+  return best;
+}
+
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
@@ -73,7 +121,8 @@ export function createAir() {
     pitch: null, // the midi note being played (fractional unless snapped)
     volume: 1,
     trace: [], // { t, midi }; midi is null while silent
-    snap: false,
+    scale: null, // pitch classes (above `key`) the pitch snaps to; null glides freely
+    key: 0,
   };
 
   let voice = null;
@@ -161,7 +210,7 @@ export function createAir() {
       const target = AIR_LOW + heightOf(air.pitchHand[PALM].y) * (AIR_HIGH - AIR_LOW);
       // Light smoothing removes tracking jitter but keeps hand-shake vibrato.
       smoothed = smoothed === null ? target : smoothed + (target - smoothed) * 0.45;
-      air.pitch = air.snap ? Math.round(smoothed) : smoothed;
+      air.pitch = air.scale ? snapToScale(smoothed, air.scale, air.key) : smoothed;
     } else {
       air.open = false;
       smoothed = null;

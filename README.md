@@ -30,7 +30,10 @@ Pantonal is an independent project, not affiliated with the House of Music Hunga
   export to MuseScore with no key or time signature.
 - **Air Thinker**: a theremin played with your hands in front of the camera.
   One hand sets the pitch (close it to stop the sound), the other the volume,
-  with adjustable vibrato. Hand tracking runs entirely in the browser; the
+  with adjustable vibrato. Pitch glides freely like the real instrument, or
+  snaps to a scale in any key: major, the minors (natural, harmonic, melodic,
+  Hungarian…), pentatonic, the modes, Turkish makams such as Hicaz, or Indian
+  ragas such as Yaman, Bhairav and Malkauns. Hand tracking runs entirely in the browser; the
   camera image never leaves the device.
 
 The drawing modes autosave in the browser, support undo and redo, and let each

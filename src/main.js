@@ -8,7 +8,7 @@ import { SCORES, parseScore } from './scores.js';
 import { toMusicXML } from './musicxml.js';
 import { readScoreFile, chooseStep } from './importxml.js';
 import { ICONS, applyIcons } from './icons.js';
-import { createAir, setBand as setAirBand, AIR_LOW, AIR_HIGH, yOfHeight } from './air.js';
+import { createAir, setBand as setAirBand, SCALES, KEY_NAMES, AIR_LOW, AIR_HIGH, yOfHeight } from './air.js';
 
 applyIcons();
 
@@ -37,7 +37,8 @@ const state = {
   loop: false,
   vibratoDepth: 25, // Air Thinker vibrato, in cents
   vibratoRate: 5.5, // vibrations per second
-  snap: false, // Air Thinker: snap to the 12 notes
+  airScale: 'free', // Air Thinker: a SCALES id
+  airKey: 0, // Air Thinker: the key, 0 = C
   showTheremin: true, // Air Thinker: draw the theremin in the camera view
   playing: false,
   playCol: -1,
@@ -932,7 +933,6 @@ controls.loop = bindCheckbox('loop');
 const applyVibrato = () => air.setVibrato(state.vibratoDepth, state.vibratoRate);
 controls.vibratoDepth = bindRange('vibratoDepth', (v) => (v ? `${v}` : 'off'), applyVibrato);
 controls.vibratoRate = bindRange('vibratoRate', (v) => `${v} /s`, applyVibrato);
-controls.snap = bindCheckbox('snap', () => (air.snap = state.snap));
 controls.showTheremin = bindCheckbox('showTheremin');
 
 // The settings bar is hidden until asked for; this browser remembers the choice.
@@ -1047,7 +1047,6 @@ async function startAir() {
   try {
     await Tone.start();
     await air.start({ depth: state.vibratoDepth, rate: state.vibratoRate });
-    air.snap = state.snap;
     state.playing = true;
     setPlayButton(true);
   } catch (err) {
@@ -1090,20 +1089,27 @@ function renderAir() {
   setAirBand(visibleTop + margin, visibleBottom - bottomMargin);
   const yOfMidi = (midi) => box.y + yOfHeight((midi - AIR_LOW) / (AIR_HIGH - AIR_LOW)) * box.h;
 
-  // Pitch scale: a line per semitone, labelled at each C.
+  // Pitch scale: a line per semitone, labelled at each C. With a scale, its
+  // notes stand out and the key note is yellow.
+  const scaleNotes = SCALES[state.airScale].notes;
+  const showKey = scaleNotes && scaleNotes.length < 12;
   ctx.font = '600 13px Fredoka, system-ui, sans-serif';
   ctx.textBaseline = 'middle';
   for (let midi = AIR_LOW; midi <= AIR_HIGH; midi++) {
     const y = yOfMidi(midi);
+    const degree = (midi - state.airKey + 120) % 12;
+    const isKey = showKey && degree === 0;
     const isC = midi % 12 === 0;
-    ctx.strokeStyle = `rgba(255, 255, 255, ${isC ? 0.28 : state.snap ? 0.12 : 0.05})`;
-    ctx.lineWidth = isC ? 1.5 : 1;
+    const labelled = isC || isKey;
+    ctx.strokeStyle = isKey ? 'rgba(242, 210, 46, 0.5)'
+      : `rgba(255, 255, 255, ${isC ? 0.28 : scaleNotes?.includes(degree) ? 0.15 : 0.05})`;
+    ctx.lineWidth = labelled ? 1.5 : 1;
     ctx.beginPath();
-    ctx.moveTo(isC ? 44 : 0, y);
+    ctx.moveTo(labelled ? 44 : 0, y);
     ctx.lineTo(W, y);
     ctx.stroke();
-    if (isC) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    if (labelled) {
+      ctx.fillStyle = isKey ? 'rgba(242, 210, 46, 0.9)' : 'rgba(255, 255, 255, 0.6)';
       ctx.fillText(midiName(midi), 10, y);
     }
   }
@@ -1244,6 +1250,76 @@ function drawTheremin(antennaX, yOfMidi, toStage, now) {
   ctx.restore();
 }
 
+/* Scale and key */
+
+const scaleButton = document.querySelector('[data-action="scale"]');
+const scaleMenu = document.getElementById('scale-menu');
+
+function applyScale() {
+  const scale = SCALES[state.airScale];
+  air.scale = scale.notes;
+  air.key = state.airKey;
+  const keyed = scale.notes && scale.notes.length < 12;
+  scaleButton.querySelector('.label').textContent = keyed ? `${KEY_NAMES[state.airKey]} · ${scale.label}` : scale.label;
+}
+
+function renderScaleMenu() {
+  const scale = SCALES[state.airScale];
+  const keyless = !scale.notes || scale.notes.length === 12;
+  const pill = (label, selected, onClick, disabled = false) => {
+    const button = document.createElement('button');
+    button.textContent = label;
+    button.className = selected ? 'selected' : '';
+    button.disabled = disabled;
+    button.setAttribute('aria-pressed', String(selected));
+    button.addEventListener('click', () => {
+      onClick();
+      applyScale();
+      renderScaleMenu();
+    });
+    return button;
+  };
+  const groups = {};
+  for (const [id, s] of Object.entries(SCALES)) (groups[s.group] ??= []).push([id, s]);
+  document.getElementById('scale-options').replaceChildren(...Object.entries(groups).flatMap(([group, scales]) => {
+    const heading = document.createElement('h4');
+    heading.textContent = group;
+    const pills = document.createElement('div');
+    pills.className = 'pills';
+    pills.append(...scales.map(([id, s]) => pill(s.label, id === state.airScale, () => (state.airScale = id))));
+    return [heading, pills];
+  }));
+  document.getElementById('key-options').replaceChildren(...KEY_NAMES.map((name, key) => pill(
+    name, !keyless && key === state.airKey, () => (state.airKey = key), keyless,
+  )));
+  const key = KEY_NAMES[state.airKey];
+  document.getElementById('scale-hint').textContent = state.airScale === 'free'
+    ? 'Glides through every pitch, like a real theremin.'
+    : state.airScale === 'chromatic' ? 'Snaps to the 12 notes.'
+      : scale.group === 'Indian ragas'
+        ? `The notes of raga ${scale.label}, with Sa on ${key}. Real ragas also have their own phrases, ornaments and in-between pitches.`
+        : scale.group === 'Turkish makams'
+          ? `The notes of makam ${scale.label} on ${key}. Real makams also use finer pitches (koma) and their own melodic paths.`
+          : scale.group === 'Minor'
+            ? `Every note snaps to ${key} ${scale.label.toLowerCase()} minor, so it always sounds in tune.`
+            : `Every note snaps to ${key} ${scale.label}, so it always sounds in tune.`;
+}
+
+function toggleScaleMenu(open = scaleMenu.hidden) {
+  scaleMenu.hidden = !open;
+  scaleButton.setAttribute('aria-expanded', String(open));
+  if (!open) return;
+  renderScaleMenu();
+  const stage = document.getElementById('stage').getBoundingClientRect();
+  scaleMenu.style.left = `${Math.max(8, scaleButton.getBoundingClientRect().left - stage.left)}px`;
+}
+
+scaleButton.addEventListener('click', () => toggleScaleMenu());
+document.addEventListener('pointerdown', (e) => {
+  if (!scaleMenu.hidden && !scaleMenu.contains(e.target) && !scaleButton.contains(e.target)) toggleScaleMenu(false);
+});
+applyScale();
+
 const airGuide = document.getElementById('air-guide');
 const airGuideStatus = document.getElementById('air-guide-status');
 
@@ -1279,6 +1355,7 @@ function setMode(mode) {
   state.mode = mode;
   document.body.dataset.mode = mode;
   airGuide.hidden = true; // renderAir shows it in Air Thinker
+  toggleScaleMenu(false);
   state.strokes = [];
   state.tool = 'brush';
   setInstruments([...DEFAULT_INSTRUMENTS], defaultColors());

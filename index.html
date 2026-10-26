@@ -46,12 +46,21 @@
         <button data-action="score" class="chromatic-only"><span class="icon" data-icon="score"></span>Score</button>
         <button data-action="export" class="chromatic-only"><span class="icon" data-icon="export"></span>Export</button>
         <button data-action="settings" class="no-free" aria-pressed="false"><span class="icon" data-icon="settings"></span>Settings</button>
+        <button data-action="scale" class="air-only" aria-expanded="false" aria-controls="scale-menu"><span class="icon" data-icon="scale"></span><span class="label">Free</span></button>
         <button id="play"><span class="icon" data-icon="play"></span><span class="label">Play</span></button>
       </header>
 
       <div id="stage">
         <canvas id="canvas"></canvas>
         <div id="score-menu" hidden></div>
+
+        <!-- Air Thinker: the scale and key the pitch snaps to. -->
+        <div id="scale-menu" hidden>
+          <h4>Key</h4>
+          <div id="key-options" class="keys"></div>
+          <p id="scale-hint"></p>
+          <div id="scale-options"></div>
+        </div>
 
         <!-- Air Thinker: how to play, shown until a hand is in view. -->
         <div id="air-guide" hidden>
@@ -126,7 +135,6 @@
       <footer id="air-controls">
         <label>Vibrato depth <input type="range" id="vibratoDepth" min="0" max="80" step="1"><output></output></label>
         <label>Vibrato speed <input type="range" id="vibratoRate" min="2" max="9" step="0.5"><output></output></label>
-        <label class="check"><input type="checkbox" id="snap"> Snap to notes</label>
         <label class="check"><input type="checkbox" id="showTheremin"> Theremin</label>
       </footer>
     </main>

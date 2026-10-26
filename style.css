@@ -268,7 +268,8 @@ body[data-mode="free"] .chromatic-only,
 body[data-mode="free"] .no-free,
 body[data-mode="free"] .clear-layer,
 body[data-mode="air"] .chromatic-only,
-body[data-mode="air"] .drawing-only {
+body[data-mode="air"] .drawing-only,
+body:not([data-mode="air"]) .air-only {
   display: none !important;
 }
 
@@ -363,6 +364,57 @@ body[data-mode="air"] .drawing-only {
   font: inherit;
   text-decoration: underline;
   cursor: pointer;
+}
+
+/* ---- Air Thinker scale menu ---- */
+
+#scale-menu {
+  position: absolute;
+  top: 8px;
+  z-index: 2;
+  width: min(460px, calc(100% - 16px));
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  padding: 18px;
+  border-radius: 16px;
+  background: #2a2a2e;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+#scale-menu[hidden] { display: none; }
+
+#scale-menu h4 {
+  margin: 0 0 8px;
+  color: #999;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#scale-menu h4 + div { margin-bottom: 14px; }
+#scale-menu .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+#scale-menu .keys { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+
+#scale-menu button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #1f1f22;
+  color: #ddd;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#scale-menu button.selected { background: #f2d22e; color: #1c1c1f; font-weight: 600; }
+#scale-menu button:disabled { opacity: 0.3; cursor: default; }
+#scale-hint { margin: -6px 0 16px; color: #999; font-size: 13px; }
+
+@media (hover: hover) {
+  #scale-menu button:not(:disabled):not(.selected):hover { background: #3a3a3f; }
 }
 
 /* ---- Air Thinker guide ---- */
